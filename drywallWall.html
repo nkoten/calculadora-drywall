@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title></title>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <script src="calculateWall.js" defer></script>
+    <script src="./global.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght,XOPQ,XTRA,YOPQ,YTDE,YTFI,YTLC,YTUC@8..144,100..1000,96,468,79,-203,738,514,712&display=swap"
+      rel="stylesheet"
+    />
+    <link href="./calc-drywall.css" rel="stylesheet" />
+  </head>
+  <body>
+    <lista-de-materiais>
+      <!-- <form id="wall_form">
+        <label>
+          <t>length</t>
+          <input
+            type="number"
+            placeholder="width"
+            id="i_wall_width"
+            autofocus
+          />
+        </label>
+        <label>
+          <t>height</t>
+          <input type="number" placeholder="height" id="i_wall_height" />
+        </label>
+        <label>
+          <t>valor da mão de obra</t>
+          <input type="number" placeholder="50" id="i_maodeobra" />
+        </label>
+      </form> -->
+      <result id="result">
+        <header>
+          <t class="service-name">Lista de Materiais e valores</t>
+        </header>
+        <table>
+          <thead class="font-bold">
+            <tr>
+              <th class="th-qtd">qtd.</th>
+              <th class="th-desc">descrição</th>
+              <th class="th-unit">R$ unit.</th>
+              <th class="th-total">R$ total</th>
+            </tr>
+          </thead>
+          <tbody id="tbody" class="font-leve"></tbody>
+          <tfoot id="tfoot"></tfoot>
+        </table>
+      </result>
+      <button onclick="handlePrint()" noprint>Imprimir / Gerar PDF</button>
+    </lista-de-materiais>
+    <p class="legal-notice" forprint>
+      * Os valores dos materiais são estimativos e podem variar de acordo com a
+      loja e a data da compra.
+    </p>
+
+    <!-- --- FAB --- -->
+    <!-- FAB (Floating Action Button) -->
+    <button
+      id="openDrawer"
+      class="fab-button"
+      aria-label="Abrir configurações"
+      noprint
+    >
+      <svg
+        xmlns="http://www.w3.org"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="fab-icon"
+      >
+        <path d="M5 12h14m-7-7v14" />
+      </svg>
+    </button>
+    <!-- --- end FAB --- -->
+
+    <!-- 
+      --- Drawer --- 
+    -->
+    <!-- Estrutura do Drawer -->
+    <div id="drawerOverlay" class="drawer-overlay" noprint>
+      <div id="drawerContent" class="drawer-content">
+        <div class="drawer-handle" id="closeDrawer"></div>
+        <!-- Barrinha de puxar visual -->
+
+        <header class="drawer-header">
+          <h2>Medidas do Teto</h2>
+        </header>
+
+        <!-- O seu formulário entra aqui -->
+        <form id="drawerForm" noprint>
+          <main-measure>
+            <label>
+              <t>Largura (m)</t>
+              <input
+                type="number"
+                placeholder="0.00"
+                id="i_wall_width"
+                step="0.01"
+                autofocus
+              />
+            </label>
+            <label>
+              <t>Altura (m)</t>
+              <input
+                type="number"
+                placeholder="0.00"
+                id="i_wall_height"
+                step="0.01"
+              />
+            </label>
+          </main-measure>
+          <label>
+            <t>Valor da mão de obra (m²)</t>
+            <input
+              type="number"
+              placeholder="R$ 50.00"
+              id="i_maodeobra"
+              step="0.01"
+            />
+          </label>
+
+          <button type="button" id="applyAndClose" class="btn-apply">
+            Aplicar e Fechar
+          </button>
+        </form>
+      </div>
+    </div>
+    <!-- --- end Drawer --- -->
+
+    <script>
+      // capturar os inputs
+      const inputWidth = document.querySelector("#i_wall_width");
+      const inputHeight = document.querySelector("#i_wall_height");
+      const inputMaoDeObra = document.querySelector("#i_maodeobra");
+      const tbody = document.querySelector("#tbody");
+      const tfoot = document.querySelector("#tfoot");
+
+      // Função principal que será chamada nos inputs
+      function atualizarCalculos() {
+        const width = parseFloat(inputWidth.value) || 0;
+        const height = parseFloat(inputHeight.value) || 0;
+        const valorUnitMaoDeObra = parseFloat(inputMaoDeObra.value) || 0;
+
+        // Se não houver medidas, limpa a tabela e para
+        if (width === 0 || height === 0) {
+          tbody.innerHTML = "";
+          tfoot.innerHTML = "";
+          return;
+        }
+
+        // Chama sua função externa (calculateWall.js)
+        const data = calculateWall({ wallLength: width, wallHeight: height });
+
+        // Mapear os itens para facilitar a renderização
+        // Ajustei os nomes baseado no retorno comum de calculadoras de drywall
+        const itens = [
+          {
+            desc: "Placa Drywall ST",
+            count: data.boards.drywallSheets,
+            value: 38.9,
+          }, // Preços fictícios
+          {
+            desc: "Guia 48mm",
+            count: data.metalFraming.runners3m,
+            value: 24.67,
+          },
+          {
+            desc: "Montante 48mm",
+            count: data.metalFraming.studs3m,
+            value: 29.6,
+          },
+          {
+            desc: "Lã de Vidro/Pet (m²)",
+            count: data.insulation.insulationM2,
+            value: 15.0,
+          },
+          {
+            desc: "Par. Lentilha (Cento)",
+            count: Math.ceil(data.fixings.framingScrews / 100),
+            value: 12.0,
+          },
+          {
+            desc: "Par. GN25 (Cento)",
+            count: Math.ceil(data.fixings.drywallScrews / 100),
+            value: 18.0,
+          },
+          {
+            desc: "Parafuso / Bucha n°6",
+            count: data.fixings.wallAnchorsAndScrews,
+            value: 0.5,
+          },
+          {
+            desc: "Fita Telada (m)",
+            count: data.finishing.jointTapeMeters,
+            value: 1.2,
+          },
+          {
+            desc: "Massa p/ Drywall (kg)",
+            count: data.finishing.jointCompoundKg,
+            value: 8.0,
+          },
+        ];
+
+        // Gerar as linhas da tabela (HTML)
+        let htmlTbody = "";
+        let valorTotalMateriais = 0;
+
+        itens.forEach((item) => {
+          const totalItem = item.count * item.value;
+          valorTotalMateriais += totalItem;
+
+          htmlTbody += `
+            <tr>
+              <td class="td-qtd">${item.count}</td>
+              <td class="td-desc">${item.desc}</td>
+              <td>${_$(item.value)}</td>
+              <td class="bold">${_$(totalItem)}</td>
+            </tr>
+          `;
+        });
+
+        // Cálculos finais (Mão de obra)
+        const areaM2 = width * height;
+        const totalMaoDeObra = areaM2 * valorUnitMaoDeObra;
+        const totalGeral = valorTotalMateriais + totalMaoDeObra;
+
+        // Adiciona linha de mão de obra no corpo
+        if (valorUnitMaoDeObra) {
+          htmlTbody += `
+            <tr>
+              <td class="td-qtd">${areaM2.toFixed(2)} m²</td>
+              <td class="td-desc">Mão de Obra</td>
+              <td class="td-unit">${false ? _$(valorUnitMaoDeObra) : ""}</td>
+              <td class="bold">${brlFormat.format(totalMaoDeObra)}</td>
+            </tr>
+          `;
+        }
+
+        let htmlTfoot = "";
+
+        // linha do total dos materiais
+        htmlTfoot += `
+          <tr>
+            <td colspan="4" id="holder_materiais">Valor dos Materiais <t class='bold'>${brlFormat.format(valorTotalMateriais)}</t></td>
+          </tr>
+        `;
+
+        // linha do total geral estimado
+        htmlTfoot += `
+          <tr>
+            <td colspan="4" class="tfoot-total">
+              Total Estimado: <strong id="valor_total_geral">${brlFormat.format(totalGeral)}</strong>
+            </td>
+          </tr>
+        `;
+
+        // Renderizar na tela
+        tbody.innerHTML = htmlTbody;
+        tfoot.innerHTML = htmlTfoot;
+      }
+
+      // Adicionar o "ouvinte" de eventos nos inputs
+      [inputWidth, inputHeight, inputMaoDeObra].forEach((input) => {
+        input.addEventListener("input", atualizarCalculos);
+      });
+    </script>
+  </body>
+</html>
