@@ -8,6 +8,7 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <script src="calculateCeiling.js"></script>
+    <script src="calculateWall.js"></script>
     <script src="./global.js" defer></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -84,6 +85,15 @@
 
         <!-- O seu formulário entra aqui -->
         <form id="drawerForm" noprint>
+          <div class="service-selector" style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <label class="radio-option">
+              <input type="radio" name="service_type" value="ceiling" checked> Teto
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="service_type" value="wall"> Parede
+            </label>
+          </div>
+
           <main-measure>
             <label>
               <t>Largura (m)</t>
@@ -105,15 +115,26 @@
               />
             </label>
           </main-measure>
-          <label>
-            <t>Valor da mão de obra (m²)</t>
-            <input
-              type="number"
-              placeholder="R$ 50.00"
-              id="i_maodeobra"
-              step="0.01"
-            />
-          </label>
+          <col-2>
+            <label>
+              <t>Mão de obra (m²)</t>
+              <input
+                type="number"
+                placeholder="R$ 50.00"
+                id="i_maodeobra"
+                step="0.01"
+              />
+            </label>
+            <label>
+              <t>Margem de perda</t>
+              <input
+                type="number"
+                placeholder="1.05"
+                id="i_margem"
+                step="0.01"
+              />
+            </label>
+          </col-2>
 
           <button type="button" id="applyAndClose" class="btn-apply">
             Aplicar e Fechar
@@ -128,6 +149,7 @@
       const inputWidth = document.querySelector("#i_ceiling_width");
       const inputLength = document.querySelector("#i_ceiling_length");
       const inputMaoDeObra = document.querySelector("#i_maodeobra");
+      const inputMargem = document.querySelector("#i_margem");
       const tbody = document.querySelector("#tbody");
       const tfoot = document.querySelector("#tfoot");
 
@@ -135,6 +157,7 @@
         const width = parseFloat(inputWidth.value) || 0;
         const length = parseFloat(inputLength.value) || 0;
         const valorUnitMaoDeObra = parseFloat(inputMaoDeObra.value) || 0;
+        const safetyMargin = parseFloat( inputMargem ) || 0;
 
         // if (width === 0 || length === 0) {
         if (width === 0 && length === 0) {
@@ -144,10 +167,13 @@
         }
 
         // Chama a função do seu arquivo calculateCeiling.js
-        const data = drywallCeilingCalculator({ width: width, length: length });
+          const Calc = {
+            ceiling: drywallCeilingCalculator({ width: width, length: length, maodeobra:valorUnitMaoDeObra, safety: safetyMargin }),
+            wall: drywallWallCalculator(),
+          };
 
         // Mapeamento dos itens do Teto
-        const itens = [
+        const ceilingItens = [
           {
             desc: "Placa Drywall ST",
             count: data.boards.drywallSheets,
@@ -183,6 +209,54 @@
           {
             desc: "Parafuso / Bucha n°6",
             count: data.fixings.wallPlugsAndScrews,
+            value: 0.5,
+          },
+          {
+            desc: "Fita Telada (m)",
+            count: data.finishing.jointTapeMeters,
+            value: 1.2,
+          },
+          {
+            desc: "Massa p/ Drywall (kg)",
+            count: data.finishing.jointCompoundKg,
+            value: 8.0,
+          },
+        ];
+        // Mapeamento dos itens da parede
+        const wallItens = [
+          {
+            desc: "Placa Drywall ST",
+            count: data.boards.drywallSheets,
+            value: 38.9,
+          }, // Preços fictícios
+          {
+            desc: "Guia 48mm",
+            count: data.metalFraming.runners3m,
+            value: 24.67,
+          },
+          {
+            desc: "Montante 48mm",
+            count: data.metalFraming.studs3m,
+            value: 29.6,
+          },
+          {
+            desc: "Lã de Vidro/Pet (m²)",
+            count: data.insulation.insulationM2,
+            value: 15.0,
+          },
+          {
+            desc: "Par. Lentilha (Cento)",
+            count: Math.ceil(data.fixings.framingScrews / 100),
+            value: 12.0,
+          },
+          {
+            desc: "Par. GN25 (Cento)",
+            count: Math.ceil(data.fixings.drywallScrews / 100),
+            value: 18.0,
+          },
+          {
+            desc: "Parafuso / Bucha n°6",
+            count: data.fixings.wallAnchorsAndScrews,
             value: 0.5,
           },
           {

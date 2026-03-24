@@ -192,12 +192,14 @@ button {
   cursor: pointer;
 }
 
-main-measure {
+main-measure,
+col-2 {
   display: flex;
   flex-flow: row;
   gap: 1rem;
 }
-main-measure label input {
+main-measure label input,
+col-2 label input {
   width: calc(100% - 1rem);
 }
 

@@ -6,11 +6,12 @@
  * @param {number} options.width - Largura do cômodo em metros
  * @param {number} options.length - Comprimento do cômodo em metros
  * @param {number} options.maodeobra - Valor ou multiplicador da mão de obra
+  * @param {number} options.safety - Margem de segurança para quebras oj perdas
  */
-function drywallCeilingCalculator({ width, length, maodeobra }) {
+function drywallCeilingCalculator({ width, length, maodeobra, safety }) {
   const area = width * length;
   const perimeter = (width + length) * 2;
-  const safetyMargin = 1.05; // 5%
+  const safetyMargin = safety || 1.00; // 1.05; // 5%
   // Definimos qual é o lado menor para distribuir os perfis F530
   // Em corredores, os perfis cruzam a menor largura para maior estabilidade.
   const menorLado = Math.min(width, length);
