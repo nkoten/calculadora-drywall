@@ -5,14 +5,17 @@
  * @param {number} options.wallHeight - Altura da parede
  * @param {Array<{width: number, height: number}>} [options.openings=[]] - Lista de aberturas (portas/janelas)
  * @param {number} [options.studSpacing=0.6] - Espaçamento entre montantes
+ * @param {number} options.safety - Margem de perdas e quebras
  */
 function calculateWall({
   wallLength,
   wallHeight,
   openings = [],
+  safety = 1.0,
   studSpacing = 0.6,
 }) {
-  const safetyMargin = 1.05; // 10%
+  // const safetyMargin = 1.05; // 10%
+  const safetyMargin = safety; // 10%
   const sheetArea = 2.16; // 1.20m x 1.80m
   const barLength = 3.0; // Standard 3m profile
 
