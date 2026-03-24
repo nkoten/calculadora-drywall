@@ -34,8 +34,7 @@ function handlePrint() {
 }
 /* --- end print handler --- */
 
-/* --- init --- */
-function init() {
+function initTable() {
   document.querySelector("#tbody").innerHTML = `${[...Array(6)]
     .map((item) => {
       return `<tr>${[...Array(4)].map((td) => {
@@ -44,6 +43,11 @@ function init() {
     })
     .join(",")
     .replace(/,/g, "")}`;
+}
+
+/* --- init --- */
+function init() {
+  initTable();
 }
 init();
 /* --- end init --- */

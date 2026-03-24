@@ -75,32 +75,31 @@
     -->
     <!-- Estrutura do Drawer -->
     <div id="drawerOverlay" class="drawer-overlay" noprint>
+      <!-- <drawer-ui> -->
       <div id="drawerContent" class="drawer-content">
+        <!-- <top-bar></top-bar> -->
         <div class="drawer-handle" id="closeDrawer"></div>
         <!-- Barrinha de puxar visual -->
 
         <header class="drawer-header">
-          <h2>Medidas do Teto</h2>
+          <h2>Medidas para</h2>
+          <h2 id="service-title">Forro</h2>
         </header>
 
         <!-- O seu formulário entra aqui -->
         <form id="drawerForm" noprint>
-          <div
-            class="service-selector"
-            style="display: flex; gap: 10px; margin-bottom: 20px"
-          >
-            <label class="radio-option">
-              <input type="radio" name="service_type" value="ceiling" checked />
-              Teto
+          <div class="switch-container" noprint>
+            <span class="switch-label">Forro</span>
+            <label class="switch">
+              <input type="checkbox" id="service_toggle" />
+              <span class="slider"></span>
             </label>
-            <label class="radio-option">
-              <input type="radio" name="service_type" value="wall" /> Parede
-            </label>
+            <span class="switch-label">Parede</span>
           </div>
 
           <main-measure>
             <label>
-              <t>Largura (m)</t>
+              <t id="label_width">Largura (m)</t>
               <input
                 type="number"
                 placeholder="0.00"
@@ -110,7 +109,7 @@
               />
             </label>
             <label>
-              <t>Comprimento (m)</t>
+              <t id="label_height-length">Comprimento (m)</t>
               <input
                 type="number"
                 placeholder="0.00"
@@ -130,13 +129,8 @@
               />
             </label>
             <label>
-              <t>Margem de perda</t>
-              <input
-                type="number"
-                placeholder="1.05"
-                id="i_margem"
-                step="0.01"
-              />
+              <t>Margem de perda (%)</t>
+              <input type="number" placeholder="0%" id="i_margem" step="0.01" />
             </label>
           </col-2>
 
@@ -145,6 +139,7 @@
           </button>
         </form>
       </div>
+      <!-- </drawer-ui> -->
     </div>
     <!-- --- end Drawer --- -->
 
@@ -157,52 +152,76 @@
       const tbody = document.querySelector("#tbody");
       const tfoot = document.querySelector("#tfoot");
 
-      function atualizarCalculosTeto() {
+      // Seleciona o toggle
+      const serviceToggle = document.querySelector("#service_toggle");
+
+      // Mapeamento das funções de cálculo (fora da função de atualizar)
+      const Calc = {
+        ceiling: (params) =>
+          calculateCeiling({
+            width: params.w,
+            length: params.l,
+            maodeobra: params.mo,
+            safety: params.s,
+          }),
+        wall: (params) =>
+          calculateWall({
+            wallLength: params.w,
+            wallHeight: params.l,
+            safety: params.s,
+          }),
+      };
+
+      // Função para trocar os labels dinamicamente
+      function generateServiceInterface() {
+        // Se estiver marcado (checked) = parede, se não = forro
+        const serviceType = serviceToggle.checked ? "wall" : "ceiling";
+
+        const labelSecundario = document.querySelector("#label_height-length");
+        const tituloDrawer = document.querySelector(
+          ".drawer-header h2#service-title",
+        );
+
+        if (serviceType === "wall") {
+          labelSecundario.innerText = "Altura (m)";
+          tituloDrawer.innerText = "Parede";
+        } else {
+          labelSecundario.innerText = "Comprimento (m)";
+          tituloDrawer.innerText = "Forro";
+        }
+        // Recalcula sempre que trocar o tipo
+        atualizarCalculos();
+      }
+
+      function atualizarCalculos() {
         const width = parseFloat(inputWidth.value) || 0;
         const length = parseFloat(inputLength.value) || 0;
         const valorUnitMaoDeObra = parseFloat(inputMaoDeObra.value) || 0;
-        const safetyMargin = parseFloat(inputMargem.value) || 0;
+        const safetyMargin = 1 + parseFloat(inputMargem.value) / 100 || 1.0;
 
         // if (width === 0 || length === 0) {
         if (width === 0 && length === 0) {
-          tbody.innerHTML = "";
-          tfoot.innerHTML = "";
+          // tbody.innerHTML = "";
+          // tfoot.innerHTML = "";
+          initTable();
           return;
         }
 
-        // Chama a função do seu arquivo calculateCeiling.js
-        const Calc = {
-          ceiling: calculateCeiling({
-            width: width,
-            length: length,
-            maodeobra: valorUnitMaoDeObra,
-            safety: safetyMargin,
-          }),
-          wall: calculateWall({
-            wallLength: width,
-            wallHeight: length,
-            safety: safetyMargin,
-          }),
-        };
-
         // seleciona o tipo de serviço para calcular os materiais: ceiling || wall;
-        let calcType = document.querySelector(
-          'input[name="service_type"]:checked',
-        ).value;
+        const serviceType = serviceToggle.checked ? "wall" : "ceiling";
 
         // Cria a variável data vazia e só preenche com a função correta
-        let data;
+        let data = Calc[serviceType]({
+          w: width,
+          l: length,
+          mo: valorUnitMaoDeObra,
+          s: safetyMargin,
+        });
+
         let items = [];
 
-        if (calcType === "ceiling") {
-          data = calculateCeiling({
-            width: width,
-            length: length,
-            maodeobra: valorUnitMaoDeObra,
-            safety: safetyMargin,
-          });
-
-          // Mapeamento dos itens do Teto
+        if (serviceType === "ceiling") {
+          // Mapeamento dos itens do Forro
           items = [
             {
               desc: "Placa Drywall ST",
@@ -253,15 +272,8 @@
             },
           ];
         } else {
-          // Só chama o cálculo de parede
-          data = calculateWall({
-            wallLength: width,
-            wallHeight: length,
-            safety: safetyMargin,
-          });
-
           // Mapeamento dos itens da parede
-          const wallItems = [
+          items = [
             {
               desc: "Placa Drywall ST",
               count: data.boards.drywallSheets,
@@ -368,8 +380,11 @@
 
       // Escutando as mudanças nos inputs
       [inputWidth, inputLength, inputMaoDeObra].forEach((input) => {
-        input.addEventListener("input", atualizarCalculosTeto);
+        input.addEventListener("input", atualizarCalculos);
       });
+
+      // Escuta a mudança no Switch
+      serviceToggle.addEventListener("change", generateServiceInterface);
     </script>
   </body>
 </html>
