@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title></title>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <script src="calculateCeiling.js"></script>
+    <script src="calculateWall.js"></script>
+    <script src="./global.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght,XOPQ,XTRA,YOPQ,YTDE,YTFI,YTLC,YTUC@8..144,100..1000,96,468,79,-203,738,514,712&display=swap"
+      rel="stylesheet"
+    />
+    <link href="./calc.css" rel="stylesheet" />
+  </head>
+  <body>
+    <lista-de-materiais>
+      <result id="result">
+        <header>
+          <t class="service-name">Lista de Materiais e valores</t>
+        </header>
+        <table>
+          <thead class="font-bold">
+            <tr>
+              <th class="th-qtd">qtd.</th>
+              <th class="th-desc">descrição</th>
+              <th class="th-unit">R$ unit.</th>
+              <th class="th-total">R$ total</th>
+            </tr>
+          </thead>
+          <tbody id="tbody" class="font-leve"></tbody>
+          <tfoot id="tfoot"></tfoot>
+        </table>
+      </result>
+      <button onclick="handlePrint()" noprint>Imprimir / Gerar PDF</button>
+    </lista-de-materiais>
+    <p class="legal-notice" forprint>
+      * Os valores dos materiais são estimativos e podem variar de acordo com a
+      loja e a data da compra.
+    </p>
+
+    <!-- --- FAB --- -->
+    <!-- FAB (Floating Action Button) -->
+    <button
+      id="openDrawer"
+      class="fab-button"
+      aria-label="Abrir configurações"
+      noprint
+    >
+      <svg
+        xmlns="http://www.w3.org"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="fab-icon"
+      >
+        <path d="M5 12h14m-7-7v14" />
+      </svg>
+      <span class="fab-text">Calcular</span>
+    </button>
+    <!-- --- end FAB --- -->
+
+    <!-- 
+      --- Drawer --- 
+    -->
+    <!-- Estrutura do Drawer -->
+    <div id="drawerOverlay" class="drawer-overlay" noprint>
+      <!-- <drawer-ui> -->
+      <header class="drawer-header">
+        <div class="drawer-handle" id="closeDrawer"></div>
+        <h2>Adicionar Serviço</h2>
+        <div id="serviceCount" class="service-count">
+          1 serviços adicionados
+        </div>
+      </header>
+      <form id="serviceForm">
+        <label class="input-group">
+          <t>Cômodo (Onde é o serviço?)</t>
+          <input
+            type="text"
+            placeholder="Ex: Quarto, Sala, Cozinha"
+            id="i_room_name"
+            required
+          />
+        </label>
+
+        <div class="selector-buttons">
+          <button type="button" class="btn-select active" data-service="wall">
+            Parede
+          </button>
+          <button type="button" class="btn-select" data-service="ceiling">
+            Forro
+          </button>
+          <input type="hidden" id="service_type_hidden" value="wall" />
+        </div>
+
+        <label class="input-group label-identification">
+          <t>Identificação</t>
+          <input
+            type="text"
+            placeholder="Ex: Parede 01"
+            id="i_identification"
+          />
+        </label>
+
+        <div class="switch-field insulation-switch">
+          <span class="switch-label">Adicionar Lã de Vidro?</span>
+          <label class="switch">
+            <input type="checkbox" id="i_insulation_toggle" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="main-measures-container">
+          <div class="measure-row">
+            <label>
+              <t>Largura (m)</t>
+              <input
+                type="number"
+                placeholder="0.00"
+                class="input-width"
+                step="0.01"
+                required
+              />
+            </label>
+            <label>
+              <t>Comprimento (m)</t>
+              <input
+                type="number"
+                placeholder="0.00"
+                class="input-length"
+                step="0.01"
+                required
+              />
+            </label>
+            <div class="row-area">0.00 m²</div>
+          </div>
+        </div>
+
+        <button type="button" id="btnAddMeasure" class="btn-add-part">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M5 12h14m-7-7v14" />
+          </svg>
+          Acrescentar mais medidas irregulares
+        </button>
+
+        <div class="openings-buttons">
+          <button type="button" id="btnAddDoor" class="btn-opening btn-door">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M10 3v18" />
+            </svg>
+            Add. Portas
+          </button>
+          <button
+            type="button"
+            id="btnAddWindow"
+            class="btn-opening btn-window"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M3 10h18" />
+              <path d="M10 3v7" />
+            </svg>
+            Add. Janelas
+          </button>
+        </div>
+
+        <div id="doorsContainer" class="openings-list"></div>
+        <div id="windowsContainer" class="openings-list"></div>
+
+        <div id="areaCalculatedInfo" class="area-calculated-notice">
+          Área Calculada até o momento:
+          <strong id="currentAreaCalculated">0.00 m²</strong>
+        </div>
+
+        <div class="drawer-footer-actions">
+          <button type="submit" class="btn-save-temp">Salvar</button>
+        </div>
+      </form>
+
+      <div class="drawer-main-action">
+        <button type="button" id="applyFinal" class="btn-final">
+          Finalizar e Adicionar Lista
+        </button>
+      </div>
+      <!-- </drawer-ui> -->
+    </div>
+    <!-- --- end Drawer --- -->
+
+    <script>
+      // --- ESTADO GLOBAL ---
+      let listaServicos = []; // Guarda todos os serviços adicionados
+      let medidasExtrasCount = 0;
+
+      // Elementos do DOM
+      const serviceForm = document.querySelector("#serviceForm");
+      const btnAddMeasure = document.querySelector("#btnAddMeasure");
+      const btnAddDoor = document.querySelector("#btnAddDoor");
+      const btnAddWindow = document.querySelector("#btnAddWindow");
+      const serviceToggleBtns = document.querySelectorAll(".btn-select");
+      const serviceTypeHidden = document.querySelector("#service_type_hidden");
+
+      // --- GERENCIAMENTO DE INTERFACE ---
+
+      // Alternar entre Parede e Forro (Botões estilo Shadcn)
+      serviceToggleBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          serviceToggleBtns.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          serviceTypeHidden.value = btn.dataset.service;
+
+          // Ajusta textos dinamicamente
+          const isWall = btn.dataset.service === "wall";
+          document.querySelector(".insulation-switch").style.display = isWall
+            ? "flex"
+            : "none";
+          document.querySelector("#label_height-length").innerText = isWall
+            ? "Altura (m)"
+            : "Comprimento (m)";
+          atualizarAreaPreview();
+        });
+      });
+
+      // Adicionar Medida Irregular (Cria novos inputs - cite: 2.jpg)
+      btnAddMeasure.addEventListener("click", () => {
+        const container = document.querySelector(".main-measures-container");
+        const row = document.createElement("div");
+        row.className = "measure-row";
+        row.innerHTML = `
+    <label><t>Largura (m)</t><input type="number" class="input-width" step="0.01" value="0"></label>
+    <label><t>${serviceTypeHidden.value === "wall" ? "Altura" : "Comprimento"} (m)</t><input type="number" class="input-length" step="0.01" value="0"></label>
+    <button type="button" class="btn-remove" onclick="this.parentElement.remove(); atualizarAreaPreview();">×</button>
+  `;
+        container.appendChild(row);
+
+        // Adiciona listener nos novos inputs
+        row
+          .querySelectorAll("input")
+          .forEach((i) => i.addEventListener("input", atualizarAreaPreview));
+      });
+
+      // Adicionar Portas/Janelas (cite: 3.jpg, 4.jpg)
+      function addOpening(containerId, label) {
+        const container = document.querySelector(`#${containerId}`);
+        const div = document.createElement("div");
+        div.className = "opening-item";
+        div.innerHTML = `
+    <t style="grid-column: span 3; font-size: 12px; font-weight: bold;">${label}</t>
+    <label><t>Larg. (m)</t><input type="number" class="op-width" step="0.01" value="0.80"></label>
+    <label><t>Alt. (m)</t><input type="number" class="op-height" step="0.01" value="2.10"></label>
+    <button type="button" class="btn-remove" onclick="this.parentElement.remove(); atualizarAreaPreview();">×</button>
+  `;
+        container.appendChild(div);
+        div
+          .querySelectorAll("input")
+          .forEach((i) => i.addEventListener("input", atualizarAreaPreview));
+        atualizarAreaPreview();
+      }
+
+      btnAddDoor.addEventListener("click", () =>
+        addOpening("doorsContainer", "Porta"),
+      );
+      btnAddWindow.addEventListener("click", () =>
+        addOpening("windowsContainer", "Janela"),
+      );
+
+      // --- CÁLCULOS EM TEMPO REAL ---
+
+      function atualizarAreaPreview() {
+        let areaBruta = 0;
+        let areaDesconto = 0;
+
+        // Soma áreas das paredes/tetos
+        document.querySelectorAll(".measure-row").forEach((row) => {
+          const w = parseFloat(row.querySelector(".input-width").value) || 0;
+          const l = parseFloat(row.querySelector(".input-length").value) || 0;
+          areaBruta += w * l;
+        });
+
+        // Soma áreas de descontos (aberturas)
+        document.querySelectorAll(".opening-item").forEach((item) => {
+          const w = parseFloat(item.querySelector(".op-width").value) || 0;
+          const h = parseFloat(item.querySelector(".op-height").value) || 0;
+          areaDesconto += w * h;
+        });
+
+        const areaLiquida = Math.max(0, areaBruta - areaDesconto);
+        document.querySelector("#currentAreaCalculated").innerText =
+          `${areaLiquida.toFixed(2)} m²`;
+        document.querySelector("#serviceCount").innerText =
+          `${listaServicos.length} serviços na lista`;
+      }
+
+      // Ouvir inputs iniciais
+      document
+        .querySelectorAll(".input-width, .input-length")
+        .forEach((i) => i.addEventListener("input", atualizarAreaPreview));
+
+      // --- SALVAR E RENDERIZAR CARDS (cite: 6.jpg) ---
+
+      serviceForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const servico = {
+          id: Date.now(),
+          room: document.querySelector("#i_room_name").value,
+          type: serviceTypeHidden.value,
+          ident: document.querySelector("#i_identification").value,
+          insulation: document.querySelector("#i_insulation_toggle").checked,
+          area: parseFloat(
+            document.querySelector("#currentAreaCalculated").innerText,
+          ),
+          // Guardamos os dados brutos para recálculo de materiais se necessário
+          width: parseFloat(document.querySelector(".input-width").value),
+          length: parseFloat(document.querySelector(".input-length").value),
+        };
+
+        listaServicos.push(servico);
+        renderizarCards();
+        serviceForm.reset();
+        document.querySelector("#doorsContainer").innerHTML = "";
+        document.querySelector("#windowsContainer").innerHTML = "";
+        atualizarAreaPreview();
+      });
+
+      function renderizarCards() {
+        const container = document.querySelector("#result"); // Ou um novo container para cards
+        // Criar container de cards se não existir
+        let cardsContainer = document.querySelector(".saved-services-list");
+        if (!cardsContainer) {
+          cardsContainer = document.createElement("div");
+          cardsContainer.className = "saved-services-list";
+          container.prepend(cardsContainer);
+        }
+
+        cardsContainer.innerHTML = listaServicos
+          .map(
+            (s) => `
+    <div class="service-card" id="card-${s.id}">
+      <div class="card-header">
+        <div class="card-title">
+          <h3>${s.room}</h3>
+          <p>${s.ident || (s.type === "wall" ? "Parede" : "Forro")}</p>
+        </div>
+        <div class="badge">${s.type === "wall" ? "Parede" : "Forro"}</div>
+      </div>
+      <div class="card-details">
+        <span>Área: <strong>${s.area.toFixed(2)} m²</strong></span>
+        <span>Lã: <strong>${s.insulation ? "Sim" : "Não"}</strong></span>
+      </div>
+      <div class="card-actions">
+        <button class="btn-action btn-delete" onclick="removerServico(${s.id})">Excluir</button>
+      </div>
+    </div>
+  `,
+          )
+          .join("");
+
+        recalcularTabelaGeral();
+      }
+
+      function removerServico(id) {
+        listaServicos = listaServicos.filter((s) => s.id !== id);
+        renderizarCards();
+      }
+
+      // --- CÁLCULO FINAL DA TABELA (SOMA DE TUDO) ---
+
+      function recalcularTabelaGeral() {
+        const totaisMateriais = {};
+        let totalMaoDeObra = 0;
+        const valorMaoObraM2 =
+          parseFloat(document.querySelector("#i_maodeobra").value) || 0;
+        const margemPercentual =
+          parseFloat(document.querySelector("#i_margem").value) || 0;
+        const safety = 1 + margemPercentual / 100;
+
+        listaServicos.forEach((s) => {
+          // Calcula materiais individualmente para este serviço
+          const data =
+            s.type === "ceiling"
+              ? calculateCeiling({
+                  width: s.width,
+                  length: s.length,
+                  safety: safety,
+                })
+              : calculateWall({
+                  wallLength: s.width,
+                  wallHeight: s.length,
+                  safety: safety,
+                });
+
+          // Aqui você deve mapear os itens (como fizemos antes) e somar no objeto totaisMateriais
+          // Exemplo simplificado:
+          const placaQtd = data.boards.drywallSheets;
+          totaisMateriais["Placa Drywall ST"] =
+            (totaisMateriais["Placa Drywall ST"] || 0) + placaQtd;
+
+          totalMaoDeObra += s.area * valorMaoObraM2;
+        });
+
+        // Renderiza a tabela do index.html com os totais acumulados
+        renderizarTabela(totaisMateriais, totalMaoDeObra);
+      }
+    </script>
+  </body>
+</html>
