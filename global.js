@@ -74,7 +74,7 @@ const closeDrawer = () => {
 };
 
 closeDrawerBtn.addEventListener("click", closeDrawer);
-applyBtn.addEventListener("click", closeDrawer);
+if (applyBtn) applyBtn.addEventListener("click", closeDrawer);
 
 // Fechar ao clicar no fundo escuro
 drawerOverlay.addEventListener("click", (e) => {

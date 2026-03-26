@@ -7,7 +7,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <script src="calculateCeiling.js"></script>
+    <!-- <script src="calculateCeiling.js"></script> -->
     <script src="calculateWall.js"></script>
     <script src="./global.js" defer></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -78,14 +78,14 @@
       <!-- <drawer-ui> -->
       <header class="drawer-header">
         <div class="drawer-handle" id="closeDrawer"></div>
-        <h2>Adicionar Serviço</h2>
+        <h2 drawer-title>Adicionar Serviço</h2>
         <div id="serviceCount" class="service-count">
-          1 serviços adicionados
+          <pill total-services> 1 serviços na lista </pill>
         </div>
       </header>
       <form id="serviceForm">
         <label class="input-group">
-          <t>Cômodo (Onde é o serviço?)</t>
+          <t class="label-text">Nome do Cômodo (Onde é o serviço?)</t>
           <input
             type="text"
             placeholder="Ex: Quarto, Sala, Cozinha"
@@ -94,58 +94,60 @@
           />
         </label>
 
-        <div class="selector-buttons">
-          <button type="button" class="btn-select active" data-service="wall">
-            Parede
-          </button>
+        <service-selector>
           <button type="button" class="btn-select" data-service="ceiling">
             Forro
           </button>
+          <button type="button" class="btn-select active" data-service="wall">
+            Parede
+          </button>
           <input type="hidden" id="service_type_hidden" value="wall" />
-        </div>
+        </service-selector>
 
         <label class="input-group label-identification">
-          <t>Identificação</t>
+          <t></t>
           <input
             type="text"
-            placeholder="Ex: Parede 01"
+            placeholder="Identificação ( Ex: Parede Leste )"
             id="i_identification"
           />
         </label>
 
-        <div class="switch-field insulation-switch">
-          <span class="switch-label">Adicionar Lã de Vidro?</span>
+        <insulation-switch class="switch-field">
+          <switch-label>Incluir Lã de Vidro/Pet?</switch-label>
           <label class="switch">
             <input type="checkbox" id="i_insulation_toggle" />
             <span class="slider"></span>
           </label>
-        </div>
+        </insulation-switch>
 
-        <div class="main-measures-container">
-          <div class="measure-row">
-            <label>
-              <t>Largura (m)</t>
-              <input
-                type="number"
-                placeholder="0.00"
-                class="input-width"
-                step="0.01"
-                required
-              />
-            </label>
-            <label>
-              <t>Comprimento (m)</t>
-              <input
-                type="number"
-                placeholder="0.00"
-                class="input-length"
-                step="0.01"
-                required
-              />
-            </label>
-            <div class="row-area">0.00 m²</div>
-          </div>
-        </div>
+        <main-measures-container class="main-measures-container">
+          <header>
+            <measure-row>
+              <label>
+                <t>Largura (m)</t>
+                <input
+                  type="number"
+                  placeholder="0.00"
+                  class="input-width"
+                  step="0.01"
+                  required
+                />
+              </label>
+              <label>
+                <t>Comprimento (m)</t>
+                <input
+                  type="number"
+                  placeholder="0.00"
+                  class="input-length"
+                  step="0.01"
+                  required
+                />
+              </label>
+            </measure-row>
+            <!-- <row-area>0.00 m²</row-area> -->
+          </header>
+        </main-measures-container>
 
         <button type="button" id="btnAddMeasure" class="btn-add-part">
           <svg
@@ -219,9 +221,11 @@
     </div>
     <!-- --- end Drawer --- -->
 
-    <script>
+    <script type="module">
+      import calculateCeiling from "./scripts/calculators/calculateCeiling.js";
+
       // --- ESTADO GLOBAL ---
-      let listaServicos = []; // Guarda todos os serviços adicionados
+      let serviceList = []; // Guarda todos os serviços adicionados
       let medidasExtrasCount = 0;
 
       // Elementos do DOM
@@ -256,13 +260,19 @@
       // Adicionar Medida Irregular (Cria novos inputs - cite: 2.jpg)
       btnAddMeasure.addEventListener("click", () => {
         const container = document.querySelector(".main-measures-container");
-        const row = document.createElement("div");
-        row.className = "measure-row";
+        const row = document.createElement("measure-row");
+        row.className = "new";
         row.innerHTML = `
-    <label><t>Largura (m)</t><input type="number" class="input-width" step="0.01" value="0"></label>
-    <label><t>${serviceTypeHidden.value === "wall" ? "Altura" : "Comprimento"} (m)</t><input type="number" class="input-length" step="0.01" value="0"></label>
-    <button type="button" class="btn-remove" onclick="this.parentElement.remove(); atualizarAreaPreview();">×</button>
-  `;
+          <label>
+            <t>Largura (m)</t>
+            <input type="number" class="input-width" step="0.01" value="0">
+          </label>
+          <label>
+            <t>${serviceTypeHidden.value === "wall" ? "Altura" : "Comprimento"} (m)</t>
+            <input type="number" class="input-length" step="0.01" value="0">
+          </label>
+          <button type="button" class="btn-remove" onclick="this.parentElement.remove(); atualizarAreaPreview();">×</button>
+        `;
         container.appendChild(row);
 
         // Adiciona listener nos novos inputs
@@ -320,7 +330,7 @@
         document.querySelector("#currentAreaCalculated").innerText =
           `${areaLiquida.toFixed(2)} m²`;
         document.querySelector("#serviceCount").innerText =
-          `${listaServicos.length} serviços na lista`;
+          `${serviceList.length} serviços na lista`;
       }
 
       // Ouvir inputs iniciais
@@ -347,7 +357,7 @@
           length: parseFloat(document.querySelector(".input-length").value),
         };
 
-        listaServicos.push(servico);
+        serviceList.push(servico);
         renderizarCards();
         serviceForm.reset();
         document.querySelector("#doorsContainer").innerHTML = "";
@@ -365,7 +375,7 @@
           container.prepend(cardsContainer);
         }
 
-        cardsContainer.innerHTML = listaServicos
+        cardsContainer.innerHTML = serviceList
           .map(
             (s) => `
     <div class="service-card" id="card-${s.id}">
@@ -392,7 +402,7 @@
       }
 
       function removerServico(id) {
-        listaServicos = listaServicos.filter((s) => s.id !== id);
+        serviceList = serviceList.filter((s) => s.id !== id);
         renderizarCards();
       }
 
@@ -407,7 +417,7 @@
           parseFloat(document.querySelector("#i_margem").value) || 0;
         const safety = 1 + margemPercentual / 100;
 
-        listaServicos.forEach((s) => {
+        serviceList.forEach((s) => {
           // Calcula materiais individualmente para este serviço
           const data =
             s.type === "ceiling"
