@@ -2,12 +2,33 @@
  * Drywall Material Estimator for Ceilings
  * Returns a complete list of materials based on room dimensions
  */
-function calculateCompleteCeiling(width, length) {
+function calculateCeiling(width, length) {
   const area = width * length;
   const perimeter = (width + length) * 2;
-  const safetyMargin = 1.1; // 10%
+  const safetyMargin = 1.0; // 10%
 
-  return {
+  const data = {
+    dimensions: {
+      area: area.toFixed( 2 ),
+      perimeter: perimeter.toFixed( 2 ),
+    },
+    boards: { drywallSheets: ceil( ( area / 2.16 ) * safetyMargin )},
+    framing: {
+      f530Profiles: ceil(((area * 1.8) / 3) * safetyMargin), 
+      perimeterTracks: ceil((perimeter / 3) * safetyMargin), 
+      suspensionKits: ceil(area * 1.5 * safetyMargin), 
+    },
+    fixings: {
+      drywallScrews: ceil((area / 2.16) * 32 * safetyMargin), 
+      framingScrews: ceil(area * 15 * safetyMargin), 
+      wallAnchorsAndScrews: ceil((perimeter / 0.6) * safetyMargin), 
+    },
+    finishing: {
+      jointTapeMeters: ceil(area * 1.5 * safetyMargin),
+      jointCompoundKg: (area * 0.5 * safetyMargin).toFixed(2),
+    },
+  };
+  const descriptions = {
     dimensions: {
       area: area.toFixed(2) + " m²",
       perimeter: perimeter.toFixed(2) + " m",
@@ -32,6 +53,18 @@ function calculateCompleteCeiling(width, length) {
       jointCompoundKg: (area * 0.5 * safetyMargin).toFixed(2),
     },
   };
+
+  return {
+    service: data,
+    serviceDescription: descriptions,
+  };
+}
+
+/**
+  * --- utils --- 
+  *  */
+function ceil( input ) {
+  return Math.ceil( input);
 }
 
 /**
