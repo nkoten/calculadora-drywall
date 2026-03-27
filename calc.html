@@ -101,6 +101,7 @@
               type="button"
               class="btn-select active"
               data-service="ceiling"
+              service="ceiling"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -115,7 +116,7 @@
               </svg>
               Forro
             </button>
-            <button type="button" class="btn-select" data-service="wall">
+            <button type="button" class="btn-select" data-service="wall" service="wall">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
@@ -163,7 +164,7 @@
                   />
                 </label>
                 <label>
-                  <t class="label-t-s">Comprimento (m)</t>
+                  <t class="label-t-s" id="label_height-length">Comprimento (m)</t>
                   <input
                     type="number"
                     placeholder="0.00"
@@ -283,7 +284,8 @@
 
           // Ajusta textos dinamicamente
           const isWall = btn.dataset.service === "wall";
-          document.querySelector(".insulation-switch").style.display = isWall
+          // const isWall = btn.getAttribute("service") === "wall";
+          document.querySelector("insulation-switch").style.display = isWall
             ? "flex"
             : "none";
           document.querySelector("#label_height-length").innerText = isWall
@@ -455,12 +457,14 @@
       // --- CÁLCULO FINAL DA TABELA (SOMA DE TUDO) ---
 
       function recalcularTabelaGeral() {
+        const iMaoDeObra = document.querySelector("#i_maodeobra") || "undefined";
+        const iSafety = document.querySelector("#i_margem") || "undefined";
         const totaisMateriais = {};
         let totalMaoDeObra = 0;
         const valorMaoObraM2 =
-          parseFloat(document.querySelector("#i_maodeobra").value) || 0;
+          iMaoDeObra !== "undefined" ? parseFloat(iMaoDeObra.value) : 0;
         const margemPercentual =
-          parseFloat(document.querySelector("#i_margem").value) || 0;
+          iSafety !== "undefined" ? parseFloat(iSafety.value) : 0;
         const safety = 1 + margemPercentual / 100;
 
         serviceList.forEach((s) => {
@@ -471,12 +475,14 @@
                   width: s.width,
                   length: s.length,
                   safety: safety,
-                })
+                }).data
               : calculateWall({
                   wallLength: s.width,
                   wallHeight: s.length,
                   safety: safety,
                 });
+
+              console.log("\n\n\ndata: ", data);
 
           // Aqui você deve mapear os itens (como fizemos antes) e somar no objeto totaisMateriais
           // Exemplo simplificado:
@@ -487,8 +493,172 @@
           totalMaoDeObra += s.area * valorMaoObraM2;
         });
 
+        function renderizarTabela( materiais, maodeora ) {
+          let items = [];
+
+        if (serviceType === "ceiling") {
+          // Mapeamento dos itens do Forro
+          items = [
+            {
+              desc: "Placa Drywall ST",
+              count: data.boards.drywallSheets,
+              value: 38.9,
+            },
+            {
+              desc: "Tabica",
+              count: data.framing.perimeterTracks,
+              value: 24.9,
+            },
+            {
+              desc: "Perfil Canaleta F530",
+              count: data.framing.f530Profiles,
+              value: 19.9,
+            },
+            { desc: "Tirante", count: data.framing.suspensionKits, value: 2.5 },
+            {
+              desc: "Regulador",
+              count: data.framing.suspensionKits,
+              value: 1.49,
+            },
+            { desc: "L-Fix", count: data.framing.suspensionKits, value: 1.5 },
+            {
+              desc: "Par. Lentilha (Cento)",
+              count: Math.ceil(data.fixings.framingScrews / 100),
+              value: 12.0,
+            },
+            {
+              desc: "Par. GN25 (Cento)",
+              count: Math.ceil(data.fixings.drywallScrews / 100),
+              value: 18.0,
+            },
+            {
+              desc: "Parafuso / Bucha n°6",
+              count: data.fixings.wallPlugsAndScrews,
+              value: 0.5,
+            },
+            {
+              desc: "Fita Telada (m)",
+              count: data.finishing.jointTapeMeters,
+              value: 1.2,
+            },
+            {
+              desc: "Massa p/ Drywall (kg)",
+              count: data.finishing.jointCompoundKg,
+              value: 8.0,
+            },
+          ];
+        } else {
+          // Mapeamento dos itens da parede
+          items = [
+            {
+              desc: "Placa Drywall ST",
+              count: data.boards.drywallSheets,
+              value: 38.9,
+            }, // Preços fictícios
+            {
+              desc: "Guia 48mm",
+              count: data.metalFraming.runners3m,
+              value: 24.67,
+            },
+            {
+              desc: "Montante 48mm",
+              count: data.metalFraming.studs3m,
+              value: 29.6,
+            },
+            {
+              desc: "Lã de Vidro/Pet (m²)",
+              count: data.insulation.insulationM2,
+              value: 15.0,
+            },
+            {
+              desc: "Par. Lentilha (Cento)",
+              count: Math.ceil(data.fixings.framingScrews / 100),
+              value: 12.0,
+            },
+            {
+              desc: "Par. GN25 (Cento)",
+              count: Math.ceil(data.fixings.drywallScrews / 100),
+              value: 18.0,
+            },
+            {
+              desc: "Parafuso / Bucha n°6",
+              count: data.fixings.wallAnchorsAndScrews,
+              value: 0.5,
+            },
+            {
+              desc: "Fita Telada (m)",
+              count: data.finishing.jointTapeMeters,
+              value: 1.2,
+            },
+            {
+              desc: "Massa p/ Drywall (kg)",
+              count: data.finishing.jointCompoundKg,
+              value: 8.0,
+            },
+          ];
+        }
+
+        let htmlTbody = "";
+        let valorTotalMateriais = 0;
+
+        // monta a tabela com os materiais
+        items.forEach((item) => {
+          const totalItem = item.count * item.value;
+          valorTotalMateriais += totalItem;
+
+          htmlTbody += `
+            <tr>
+            <td class="td-qtd">${item.count}</td>
+              <td class="td-desc">${item.desc}</td>
+              <td>${_$(item.value)}</td>
+              <td class="bold">${_$(totalItem)}</td>
+            </tr>
+          `;
+        });
+
+        // Cálculo da Área e Mão de Obra
+        const areaM2 = width * length;
+        const totalMaoDeObra = areaM2 * valorUnitMaoDeObra;
+        const totalGeral = valorTotalMateriais + totalMaoDeObra;
+
+        // Linha da Mão de Obra
+        if (valorUnitMaoDeObra) {
+          htmlTbody += `
+            <tr>
+              <td class="td-qtd">${Math.ceil(areaM2.toFixed(2))} m²</td>
+              <td class="td-desc">Mão de Obra (Instalação)</td>
+              <td class="td-unit">${false ? brlFormat.format(valorUnitMaoDeObra) : ""}</td>
+              <td class="bold">${_$(totalMaoDeObra)}</td>
+            </tr>
+          `;
+        }
+
+        let htmlTfoot = "";
+
+        // linha para total dos materiais
+        htmlTfoot += `
+          <tr>
+            <td colspan="4" id="holder_materiais">Valor dos Materiais <t class='bold'>${brlFormat.format(valorTotalMateriais)}</t></td>
+          </tr>
+        `;
+        // linha para valor total geral estimado
+        htmlTfoot += `
+          <tr>
+            <td colspan="4" class="tfoot-total">
+              Total Estimado: <strong id="valor_total_geral">${brlFormat.format(totalGeral)}</strong>
+            </td>
+          </tr>
+        `;
+
+        tbody.innerHTML = htmlTbody;
+        tfoot.innerHTML = htmlTfoot;
+      }
+
+        }
+
         // Renderiza a tabela do index.html com os totais acumulados
         renderizarTabela(totaisMateriais, totalMaoDeObra);
+        
       }
     </script>
   </body>
