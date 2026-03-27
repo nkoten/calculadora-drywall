@@ -16,6 +16,7 @@
       href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght,XOPQ,XTRA,YOPQ,YTDE,YTFI,YTLC,YTUC@8..144,100..1000,96,468,79,-203,738,514,712&display=swap"
       rel="stylesheet"
     />
+    <link href="./tailwind.css" rel="stylesheet" />
     <link href="./calc.css" rel="stylesheet" />
   </head>
   <body>
@@ -94,77 +95,90 @@
           />
         </label>
 
-        <service-selector>
-          <button type="button" class="btn-select" data-service="ceiling">
-            Forro
-          </button>
-          <button type="button" class="btn-select active" data-service="wall">
-            Parede
-          </button>
-          <input type="hidden" id="service_type_hidden" value="wall" />
-        </service-selector>
+        <service-card>
+          <service-selector>
+            <button
+              type="button"
+              class="btn-select active"
+              data-service="ceiling"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                fill="currentColor"
+                viewBox="0 0 256 256"
+              >
+                <path
+                  d="M224,152V136a96.37,96.37,0,0,0-64-90.51V40a16,16,0,0,0-16-16H112A16,16,0,0,0,96,40v5.49A96.37,96.37,0,0,0,32,136v16a16,16,0,0,0-16,16v24a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V168A16,16,0,0,0,224,152Zm-16-16v16H160V62.67A80.36,80.36,0,0,1,208,136ZM144,40V152H112V40ZM48,136A80.36,80.36,0,0,1,96,62.67V152H48Zm176,56H32V168H224v24Z"
+                ></path>
+              </svg>
+              Forro
+            </button>
+            <button type="button" class="btn-select" data-service="wall">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                fill="currentColor"
+                viewBox="0 0 256 256"
+              >
+                <path
+                  d="M224,48H32a8,8,0,0,0-8,8V200a8,8,0,0,0,8,8H224a8,8,0,0,0,8-8V56A8,8,0,0,0,224,48ZM88,144V112h80v32Zm-48,0V112H72v32Zm144-32h32v32H184Zm32-16H136V64h80ZM120,64V96H40V64ZM40,160h80v32H40Zm96,32V160h80v32Z"
+                ></path>
+              </svg>
+              Parede
+            </button>
+            <input type="hidden" id="service_type_hidden" value="wall" />
+          </service-selector>
 
-        <label class="input-group label-identification">
-          <t></t>
-          <input
-            type="text"
-            placeholder="Identificação ( Ex: Parede Leste )"
-            id="i_identification"
-          />
-        </label>
-
-        <insulation-switch class="switch-field">
-          <switch-label>Incluir Lã de Vidro/Pet?</switch-label>
-          <label class="switch">
-            <input type="checkbox" id="i_insulation_toggle" />
-            <span class="slider"></span>
+          <label class="input-group label-identification">
+            <t></t>
+            <input
+              type="text"
+              placeholder="Identificação ( Ex: Parede Leste )"
+              id="i_identification"
+            />
           </label>
-        </insulation-switch>
 
-        <main-measures-container class="main-measures-container">
-          <header>
-            <measure-row>
-              <label>
-                <t>Largura (m)</t>
-                <input
-                  type="number"
-                  placeholder="0.00"
-                  class="input-width"
-                  step="0.01"
-                  required
-                />
-              </label>
-              <label>
-                <t>Comprimento (m)</t>
-                <input
-                  type="number"
-                  placeholder="0.00"
-                  class="input-length"
-                  step="0.01"
-                  required
-                />
-              </label>
-            </measure-row>
-            <!-- <row-area>0.00 m²</row-area> -->
-          </header>
-        </main-measures-container>
+          <insulation-switch class="switch-field">
+            <switch-label>Incluir Lã de Vidro/Pet?</switch-label>
+            <label class="switch">
+              <input type="checkbox" id="i_insulation_toggle" />
+              <span class="slider"></span>
+            </label>
+          </insulation-switch>
 
-        <button type="button" id="btnAddMeasure" class="btn-add-part">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M5 12h14m-7-7v14" />
-          </svg>
-          Acrescentar mais medidas irregulares
-        </button>
+          <main-measures-container class="main-measures-container">
+            <header>
+              <measure-row>
+                <label>
+                  <t>Largura (m)</t>
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    class="input-width"
+                    step="0.01"
+                    required
+                  />
+                </label>
+                <label>
+                  <t>Comprimento (m)</t>
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    class="input-length"
+                    step="0.01"
+                    required
+                  />
+                </label>
+              </measure-row>
+              <!-- <row-area>0.00 m²</row-area> -->
+            </header>
+          </main-measures-container>
 
-        <div class="openings-buttons">
-          <button type="button" id="btnAddDoor" class="btn-opening btn-door">
+          <!-- <button type="button" id="btnAddMeasure" class="btn-add-part"> -->
+          <button type="button" id="btnAddMeasure">
             <svg
               width="18"
               height="18"
@@ -173,31 +187,47 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M10 3v18" />
+              <path d="M5 12h14m-7-7v14" />
             </svg>
-            Add. Portas
+            Acrescentar medida irregular
           </button>
-          <button
-            type="button"
-            id="btnAddWindow"
-            class="btn-opening btn-window"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M3 10h18" />
-              <path d="M10 3v7" />
-            </svg>
-            Add. Janelas
-          </button>
-        </div>
+
+          <add-portas-e-janelas class="space-y-2 mt-2 px-1">
+            <div class="descontar-vao">
+              <span class="text-descontar-vao"> Descontar Vãos da Parede </span>
+              <div class="descontar-btns">
+                <button type="button" id="btnAddDoor" class="btn-descontar">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      d="M232,216H208V40a16,16,0,0,0-16-16H64A16,16,0,0,0,48,40V216H24a8,8,0,0,0,0,16H232a8,8,0,0,0,0-16ZM64,40H192V216H64Zm104,92a12,12,0,1,1-12-12A12,12,0,0,1,168,132Z"
+                    ></path>
+                  </svg>
+                  + Porta
+                </button>
+                <button type="button" id="btnAddWindow" class="btn-descontar">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V88H40V56Zm0,144H40V104H216v96Z"
+                    ></path>
+                  </svg>
+                  + Janela
+                </button>
+              </div>
+            </div>
+          </add-portas-e-janelas>
+        </service-card>
 
         <div id="doorsContainer" class="openings-list"></div>
         <div id="windowsContainer" class="openings-list"></div>
