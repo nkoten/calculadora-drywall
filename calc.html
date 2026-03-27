@@ -482,7 +482,7 @@
                   safety: safety,
                 });
 
-              console.log("\n\n\ndata: ", data);
+              console.log(`\n\n\n${s.type === "ceiling" ? "ceilingData" : "wallData"}: `, data);
 
           // Aqui você deve mapear os itens (como fizemos antes) e somar no objeto totaisMateriais
           // Exemplo simplificado:
@@ -652,7 +652,7 @@
 
         tbody.innerHTML = htmlTbody;
         tfoot.innerHTML = htmlTfoot;
-      }
+      
 
         }
 
