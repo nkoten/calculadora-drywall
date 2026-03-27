@@ -153,7 +153,7 @@
             <header>
               <measure-row>
                 <label>
-                  <t>Largura (m)</t>
+                  <t class="label-t-s">Largura (m)</t>
                   <input
                     type="number"
                     placeholder="0.00"
@@ -163,7 +163,7 @@
                   />
                 </label>
                 <label>
-                  <t>Comprimento (m)</t>
+                  <t class="label-t-s">Comprimento (m)</t>
                   <input
                     type="number"
                     placeholder="0.00"
@@ -229,9 +229,15 @@
           </add-portas-e-janelas>
         </service-card>
 
-        <div id="doorsContainer" class="openings-list"></div>
-        <div id="windowsContainer" class="openings-list"></div>
+        <doors-container class="openings-list"></doors-container>
+        <windows-container class="openings-list"></windows-container>
 
+        <visor-area>
+          <left class="">
+            <span class="top">Área Calculada</span><span class="bottom text-xs italic opacity-70">(Bruta - Vãos)</span>
+          </left>
+          <right class="text-xl font-black">0.00 m²</right>
+        </visor-area>
         <div id="areaCalculatedInfo" class="area-calculated-notice">
           Área Calculada até o momento:
           <strong id="currentAreaCalculated">0.00 m²</strong>
@@ -294,11 +300,11 @@
         row.className = "new";
         row.innerHTML = `
           <label>
-            <t>Largura (m)</t>
+            <t class="label-t-s">Largura (m)</t>
             <input type="number" class="input-width" step="0.01" value="0">
           </label>
           <label>
-            <t>${serviceTypeHidden.value === "wall" ? "Altura" : "Comprimento"} (m)</t>
+            <t class="label-t-s">${serviceTypeHidden.value === "wall" ? "Altura" : "Comprimento"} (m)</t>
             <input type="number" class="input-length" step="0.01" value="0">
           </label>
           <button type="button" class="btn-remove" onclick="this.parentElement.remove(); atualizarAreaPreview();">×</button>
@@ -313,15 +319,23 @@
 
       // Adicionar Portas/Janelas (cite: 3.jpg, 4.jpg)
       function addOpening(containerId, label) {
-        const container = document.querySelector(`#${containerId}`);
+        const container = document.querySelector(`${containerId}`);
         const div = document.createElement("div");
         div.className = "opening-item";
         div.innerHTML = `
-    <t style="grid-column: span 3; font-size: 12px; font-weight: bold;">${label}</t>
-    <label><t>Larg. (m)</t><input type="number" class="op-width" step="0.01" value="0.80"></label>
-    <label><t>Alt. (m)</t><input type="number" class="op-height" step="0.01" value="2.10"></label>
-    <button type="button" class="btn-remove" onclick="this.parentElement.remove(); atualizarAreaPreview();">×</button>
-  `;
+          <t style="grid-column: span 3; font-size: 12px; font-weight: bold;">${label}</t>
+          <label>
+            <t class='label-t-s'>Larg. (m)</t>
+            <input type="number" class="op-width" step="0.01" value=${label === 'Porta' ? "0.80" : "1.50"}>
+          </label>
+          <label>
+            <t class='label-t-s'>Alt. (m)</t>
+            <input type="number" class="op-height" step="0.01" value=${label === 'Porta' ? "2.10" : '1.50'}>
+          </label>
+          <btn-remove class="btn-remove" onclick="this.parentElement.remove(); atualizarAreaPreview();">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256" class="text-red-600"><path d="M200,56V208a8,8,0,0,1-8,8H64a8,8,0,0,1-8-8V56Z" opacity="0.2"></path><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"></path></svg>
+          </btn-remove>
+        `;
         container.appendChild(div);
         div
           .querySelectorAll("input")
@@ -330,10 +344,10 @@
       }
 
       btnAddDoor.addEventListener("click", () =>
-        addOpening("doorsContainer", "Porta"),
+        addOpening("doors-container", "Porta"),
       );
       btnAddWindow.addEventListener("click", () =>
-        addOpening("windowsContainer", "Janela"),
+        addOpening("windows-container", "Janela"),
       );
 
       // --- CÁLCULOS EM TEMPO REAL ---
@@ -390,8 +404,8 @@
         serviceList.push(servico);
         renderizarCards();
         serviceForm.reset();
-        document.querySelector("#doorsContainer").innerHTML = "";
-        document.querySelector("#windowsContainer").innerHTML = "";
+        document.querySelector("doors-container").innerHTML = "";
+        document.querySelector("windows-container").innerHTML = "";
         atualizarAreaPreview();
       });
 
