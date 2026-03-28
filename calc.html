@@ -294,7 +294,9 @@
         btn.addEventListener("click", () => {
           serviceToggleBtns.forEach((b) => b.classList.remove("active"));
           btn.classList.add("active");
-          serviceTypeHidden.value = btn.dataset.service;
+          // serviceTypeHidden.value = btn.dataset.service;
+          serviceTypeHidden.value = btn.getAttribute("service");
+          console.log( "changingTo: ", btn.dataset.service, serviceTypeHidden.value );
 
           // Ajusta textos dinamicamente
           const isWall = btn.dataset.service === "wall";
@@ -449,22 +451,22 @@
         cardsContainer.innerHTML = serviceList
           .map(
             (s) => `
-              <div class="service-card" id="card-${s.id}">
-                <div class="card-header">
+              <service-card class="service-card" id="card-${s.id}">
+                <header class="card-header">
                   <div class="card-title">
                     <h3>${s.room}</h3>
                     <p>${s.ident || (s.type === "wall" ? "Parede" : "Forro")}</p>
                   </div>
                   <div class="badge">${s.type === "wall" ? "Parede" : "Forro"}</div>
-                </div>
-                <div class="card-details">
+                </header>
+                <card-details class="card-details">
                   <span>Área: <strong>${s.area.toFixed(2)} m²</strong></span>
                   <span>Lã: <strong>${s.insulation ? "Sim" : "Não"}</strong></span>
-                </div>
-                <div class="card-actions">
+                </card-list>
+                <card-actions class="card-actions">
                   <button class="btn-action btn-delete" onclick="removerServico(${s.id})">Excluir</button>
-                </div>
-              </div>
+                </card-actions>
+              </service-card>
             `,
           )
           .join("");
@@ -523,7 +525,9 @@
         function renderizarTabela(materiais, maodeora) {
           let items = [];
 
-          if (serviceTypeHidden === "ceiling") {
+          if (serviceTypeHidden.value === "ceiling") {
+            console.log( "\n\n\nisCeiling" );
+            console.log( "data is: ", data );
             // Mapeamento dos itens do Forro
             items = [
               {
@@ -579,6 +583,7 @@
               },
             ];
           } else {
+            console.log( "\n\n\nisWall" );
             // Mapeamento dos itens da parede
             items = [
               {
