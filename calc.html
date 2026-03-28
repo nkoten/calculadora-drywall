@@ -275,6 +275,9 @@
       let serviceList = []; // Guarda todos os serviços adicionados
       let medidasExtrasCount = 0;
       const ID = Date.now();
+      const dwID = `dw-service:${ID}`;
+      const dwService = {id: dwID, services: []};
+
 
       // Elementos do DOM
       const serviceForm = document.querySelector("#serviceForm");
@@ -401,11 +404,9 @@
       // --- Salva e renderiza os cards (cite: 6.jpg) ---
       serviceForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        const dwID = `dw-services:${ID}`;
-        const dwServices = [];
-        if (LS.get(dwID)) {
-          dwServices = [...LS.get(dwID)];
-        }
+        // if (LS.get(dwID)) {
+        //   dwService.services = [...LS.get(dwID)];
+        // }
 
         const servico = {
           id: Date.now(),
@@ -425,8 +426,8 @@
         };
 
         serviceList.push(servico);
-        dwServices.push(servico);
-        LS.save(dwID, dwServices);
+        dwService.services.push(servico);
+        LS.save(dwID, dwService);
         renderizarCards();
         serviceForm.reset();
         document.querySelector("doors-container").innerHTML = "";
@@ -687,6 +688,12 @@
         // Renderiza a tabela do index.html com os totais acumulados
         renderizarTabela(totaisMateriais, totalMaoDeObra);
       }
+    
+      addEventListener( "load", _ => {
+        console.log( "serviceType: ", serviceTypeHidden.value );
+        // remove a opção de inserir lã para Forro
+        document.querySelector("insulation-switch").style.display = serviceTypeHidden === "ceiling" ? "none" : "flex";
+      } );
     </script>
   </body>
 </html>
