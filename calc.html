@@ -147,11 +147,11 @@
           </label>
 
           <insulation-switch class="switch-field">
-            <switch-label>Incluir Lã de Vidro/Pet?</switch-label>
-            <label class="switch">
-              <input type="checkbox" id="i_insulation_toggle" />
-              <span class="slider"></span>
-            </label>
+            <!-- <switch-label>Incluir Lã de Vidro/Pet?</switch-label> -->
+            <!-- <label class="switch"> -->
+            <!--   <input type="checkbox" id="i_insulation_toggle" /> -->
+            <!--   <span class="slider"></span> -->
+            <!-- </label> -->
           </insulation-switch>
 
           <main-measures-container class="main-measures-container">
@@ -168,9 +168,7 @@
                   />
                 </label>
                 <label>
-                  <t class="label-t-s" id="label_height-length"
-                    >Comprimento (m)</t
-                  >
+                  <t class="label-t-s" id="label_height-length">Comprimento (m)</t>
                   <input
                     type="number"
                     placeholder="0.00"
@@ -269,6 +267,8 @@
 
     <script type="module">
       import calculateCeiling from "./scripts/calculators/calculateCeiling.js";
+      import { insulationSwitch } from './components/insulationSwitch.js';
+      import { $, $$, } from './helpers/helpers.js';
       import LS from "./ls.js";
 
       // --- ESTADO GLOBAL ---
@@ -280,12 +280,12 @@
 
 
       // Elementos do DOM
-      const serviceForm = document.querySelector("#serviceForm");
-      const btnAddMeasure = document.querySelector("#btnAddMeasure");
-      const btnAddDoor = document.querySelector("#btnAddDoor");
-      const btnAddWindow = document.querySelector("#btnAddWindow");
-      const serviceToggleBtns = document.querySelectorAll(".btn-select");
-      const serviceTypeHidden = document.querySelector("#service_type_hidden");
+      const serviceForm = $("#serviceForm");
+      const btnAddMeasure = $("#btnAddMeasure");
+      const btnAddDoor = $("#btnAddDoor");
+      const btnAddWindow = $("#btnAddWindow");
+      const serviceToggleBtns = $$(".btn-select");
+      const serviceTypeHidden = $("#service_type_hidden");
 
       // --- GERENCIAMENTO DE INTERFACE ---
 
@@ -294,26 +294,28 @@
         btn.addEventListener("click", () => {
           serviceToggleBtns.forEach((b) => b.classList.remove("active"));
           btn.classList.add("active");
-          // serviceTypeHidden.value = btn.dataset.service;
-          serviceTypeHidden.value = btn.getAttribute("service");
+          serviceTypeHidden.value = btn.dataset.service;
+          // serviceTypeHidden.value = btn.getAttribute("service");
           console.log( "changingTo: ", btn.dataset.service, serviceTypeHidden.value );
 
           // Ajusta textos dinamicamente
           const isWall = btn.dataset.service === "wall";
           // const isWall = btn.getAttribute("service") === "wall";
-          document.querySelector("insulation-switch").style.display = isWall
+          $("insulation-switch").style.display = isWall
             ? "flex"
             : "none";
-          document.querySelector("#label_height-length").innerText = isWall
+          $("#label_height-length").innerText = isWall
             ? "Altura (m)"
             : "Comprimento (m)";
+          // adiciona o input para inserir lã 
+          $( "insulation-switch" ).innerHTML = isWall ? insulationSwitch : "";
           atualizarAreaPreview();
         });
       });
 
       // Adicionar Medida Irregular (Cria novos inputs - cite: 2.jpg)
       btnAddMeasure.addEventListener("click", () => {
-        const container = document.querySelector(".main-measures-container");
+        const container = $(".main-measures-container");
         const row = document.createElement("measure-row");
         row.className = "new";
         row.innerHTML = `
@@ -339,7 +341,7 @@
 
       // Adicionar Portas/Janelas (cite: 3.jpg, 4.jpg)
       function addOpening(containerId, label) {
-        const container = document.querySelector(`${containerId}`);
+        const container = $(`${containerId}`);
         const div = document.createElement("opening-item");
         div.className = "opening-item";
         div.innerHTML = `
@@ -377,23 +379,23 @@
         let areaDesconto = 0;
 
         // Soma áreas das paredes/tetos
-        document.querySelectorAll("measure-row").forEach((row) => {
+        $$("measure-row").forEach((row) => {
           const w = parseFloat(row.querySelector(".input-width").value) || 0;
           const l = parseFloat(row.querySelector(".input-length").value) || 0;
           areaBruta += w * l;
         });
 
         // Soma áreas de descontos (aberturas)
-        document.querySelectorAll("opening-item").forEach((item) => {
+        $$("opening-item").forEach((item) => {
           const w = parseFloat(item.querySelector(".op-width").value) || 0;
           const h = parseFloat(item.querySelector(".op-height").value) || 0;
           areaDesconto += w * h;
         });
 
         const areaLiquida = Math.max(0, areaBruta - areaDesconto);
-        document.querySelector("#currentAreaCalculated").innerText =
+        $("#currentAreaCalculated").innerText =
           `${areaLiquida.toFixed(2)} m²`;
-        document.querySelector("#serviceCount").innerText =
+        $("#serviceCount").innerText =
           `${serviceList.length} serviços na lista`;
       }
 
@@ -412,19 +414,19 @@
 
         const servico = {
           id: Date.now(),
-          room: document.querySelector("#i_room_name").value,
+          room: $("#i_room_name").value,
           type: serviceTypeHidden.value,
-          ident: document.querySelector("#i_identification").value,
+          ident: $("#i_identification").value,
           insulation:
-            serviceTypeHidden !== "ceiling"
-              ? document.querySelector("#i_insulation_toggle").checked
+            serviceTypeHidden.value !== "ceiling"
+              ? $("#i_insulation_toggle").checked
               : "undefined",
           area: parseFloat(
-            document.querySelector("#currentAreaCalculated").innerText,
+            $("#currentAreaCalculated").innerText,
           ),
           // Guardamos os dados brutos para recálculo de materiais se necessário
-          width: parseFloat(document.querySelector(".input-width").value),
-          length: parseFloat(document.querySelector(".input-length").value),
+          width: parseFloat($(".input-width").value),
+          length: parseFloat($(".input-length").value),
         };
 
         serviceList.push(servico);
@@ -432,16 +434,16 @@
         LS.save(dwID, dwService);
         renderizarCards();
         serviceForm.reset();
-        document.querySelector("doors-container").innerHTML = "";
-        document.querySelector("windows-container").innerHTML = "";
+        $("doors-container").innerHTML = "";
+        $("windows-container").innerHTML = "";
         atualizarAreaPreview();
       });
 
       //
       function renderizarCards() {
-        const container = document.querySelector("#result"); // Ou um novo container para cards
+        const container = $("#result"); // Ou um novo container para cards
         // Criar container de cards se não existir
-        let cardsContainer = document.querySelector(".saved-services-list");
+        let cardsContainer = $(".saved-services-list");
         if (!cardsContainer) {
           cardsContainer = document.createElement("cards-container");
           cardsContainer.className = "saved-services-list";
@@ -483,8 +485,8 @@
 
       function recalcularTabelaGeral() {
         const iMaoDeObra =
-          document.querySelector("#i_maodeobra") || "undefined";
-        const iSafety = document.querySelector("#i_margem") || "undefined";
+          $("#i_maodeobra") || "undefined";
+        const iSafety = $("#i_margem") || "undefined";
         const totaisMateriais = {};
         let totalMaoDeObra = 0;
         const valorMaoObraM2 =
@@ -697,7 +699,7 @@
       addEventListener( "load", _ => {
         console.log( "serviceType: ", serviceTypeHidden.value );
         // remove a opção de inserir lã para Forro
-        document.querySelector("insulation-switch").style.display = serviceTypeHidden === "ceiling" ? "none" : "flex";
+        $("insulation-switch").style.display = serviceTypeHidden.value === "ceiling" ? "none" : "flex";
       } );
     </script>
   </body>
