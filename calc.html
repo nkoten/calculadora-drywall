@@ -274,6 +274,7 @@
       // --- ESTADO GLOBAL ---
       let serviceList = []; // Guarda todos os serviços adicionados
       let medidasExtrasCount = 0;
+      const ID = Date.now();
 
       // Elementos do DOM
       const serviceForm = document.querySelector("#serviceForm");
@@ -400,8 +401,11 @@
       // --- Salva e renderiza os cards (cite: 6.jpg) ---
       serviceForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        const services = [];
-        if (LS.get("dw-services")) LS.get("dw-services");
+        const dwID = `dw-services:${ID}`;
+        const dwServices = [];
+        if (LS.get(dwID)) {
+          dwServices = [...LS.get(dwID)];
+        }
 
         const servico = {
           id: Date.now(),
@@ -421,8 +425,8 @@
         };
 
         serviceList.push(servico);
-        services.push(servico);
-        LS.save("dw-services", services);
+        dwServices.push(servico);
+        LS.save(dwID, dwServices);
         renderizarCards();
         serviceForm.reset();
         document.querySelector("doors-container").innerHTML = "";
