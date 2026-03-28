@@ -7,7 +7,6 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <!-- <script src="calculateCeiling.js"></script> -->
     <script src="calculateWall.js"></script>
     <script src="./global.js" defer></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -116,7 +115,12 @@
               </svg>
               Forro
             </button>
-            <button type="button" class="btn-select" data-service="wall" service="wall">
+            <button
+              type="button"
+              class="btn-select"
+              data-service="wall"
+              service="wall"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
@@ -130,7 +134,7 @@
               </svg>
               Parede
             </button>
-            <input type="hidden" id="service_type_hidden" value="wall" />
+            <input type="hidden" id="service_type_hidden" value="ceiling" />
           </service-selector>
 
           <label class="input-group label-identification">
@@ -164,7 +168,9 @@
                   />
                 </label>
                 <label>
-                  <t class="label-t-s" id="label_height-length">Comprimento (m)</t>
+                  <t class="label-t-s" id="label_height-length"
+                    >Comprimento (m)</t
+                  >
                   <input
                     type="number"
                     placeholder="0.00"
@@ -235,7 +241,10 @@
 
         <visor-area>
           <left class="">
-            <span class="top">Área Calculada</span><span class="bottom text-xs italic opacity-70">(Bruta - Vãos)</span>
+            <span class="top">Área Calculada</span
+            ><span class="bottom text-xs italic opacity-70"
+              >(Bruta - Vãos)</span
+            >
           </left>
           <right class="text-xl font-black">0.00 m²</right>
         </visor-area>
@@ -260,6 +269,7 @@
 
     <script type="module">
       import calculateCeiling from "./scripts/calculators/calculateCeiling.js";
+      import LS from "./ls.js";
 
       // --- ESTADO GLOBAL ---
       let serviceList = []; // Guarda todos os serviços adicionados
@@ -324,17 +334,17 @@
       // Adicionar Portas/Janelas (cite: 3.jpg, 4.jpg)
       function addOpening(containerId, label) {
         const container = document.querySelector(`${containerId}`);
-        const div = document.createElement("div");
+        const div = document.createElement("opening-item");
         div.className = "opening-item";
         div.innerHTML = `
           <t style="grid-column: span 3; font-size: 12px; font-weight: bold;">${label}</t>
           <label>
             <t class='label-t-s'>Larg. (m)</t>
-            <input type="number" class="op-width" step="0.01" value=${label === 'Porta' ? "0.80" : "1.50"}>
+            <input type="number" class="op-width" step="0.01" value=${label === "Porta" ? "0.80" : "1.50"}>
           </label>
           <label>
             <t class='label-t-s'>Alt. (m)</t>
-            <input type="number" class="op-height" step="0.01" value=${label === 'Porta' ? "2.10" : '1.50'}>
+            <input type="number" class="op-height" step="0.01" value=${label === "Porta" ? "2.10" : "1.50"}>
           </label>
           <btn-remove class="btn-remove" onclick="this.parentElement.remove(); atualizarAreaPreview();">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256" class="text-red-600"><path d="M200,56V208a8,8,0,0,1-8,8H64a8,8,0,0,1-8-8V56Z" opacity="0.2"></path><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"></path></svg>
@@ -361,14 +371,14 @@
         let areaDesconto = 0;
 
         // Soma áreas das paredes/tetos
-        document.querySelectorAll(".measure-row").forEach((row) => {
+        document.querySelectorAll("measure-row").forEach((row) => {
           const w = parseFloat(row.querySelector(".input-width").value) || 0;
           const l = parseFloat(row.querySelector(".input-length").value) || 0;
           areaBruta += w * l;
         });
 
         // Soma áreas de descontos (aberturas)
-        document.querySelectorAll(".opening-item").forEach((item) => {
+        document.querySelectorAll("opening-item").forEach((item) => {
           const w = parseFloat(item.querySelector(".op-width").value) || 0;
           const h = parseFloat(item.querySelector(".op-height").value) || 0;
           areaDesconto += w * h;
@@ -381,22 +391,27 @@
           `${serviceList.length} serviços na lista`;
       }
 
-      // Ouvir inputs iniciais
+      // Ouve inputs iniciais: ".input-width, .input-length"
+      // e atualizarAreaPreview
       document
         .querySelectorAll(".input-width, .input-length")
         .forEach((i) => i.addEventListener("input", atualizarAreaPreview));
 
-      // --- SALVAR E RENDERIZAR CARDS (cite: 6.jpg) ---
-
+      // --- Salva e renderiza os cards (cite: 6.jpg) ---
       serviceForm.addEventListener("submit", (e) => {
         e.preventDefault();
+        const services = [];
+        if (LS.get("dw-services")) LS.get("dw-services");
 
         const servico = {
           id: Date.now(),
           room: document.querySelector("#i_room_name").value,
           type: serviceTypeHidden.value,
           ident: document.querySelector("#i_identification").value,
-          insulation: document.querySelector("#i_insulation_toggle").checked,
+          insulation:
+            serviceTypeHidden !== "ceiling"
+              ? document.querySelector("#i_insulation_toggle").checked
+              : "undefined",
           area: parseFloat(
             document.querySelector("#currentAreaCalculated").innerText,
           ),
@@ -406,6 +421,8 @@
         };
 
         serviceList.push(servico);
+        services.push(servico);
+        LS.save("dw-services", services);
         renderizarCards();
         serviceForm.reset();
         document.querySelector("doors-container").innerHTML = "";
@@ -413,12 +430,13 @@
         atualizarAreaPreview();
       });
 
+      //
       function renderizarCards() {
         const container = document.querySelector("#result"); // Ou um novo container para cards
         // Criar container de cards se não existir
         let cardsContainer = document.querySelector(".saved-services-list");
         if (!cardsContainer) {
-          cardsContainer = document.createElement("div");
+          cardsContainer = document.createElement("cards-container");
           cardsContainer.className = "saved-services-list";
           container.prepend(cardsContainer);
         }
@@ -426,23 +444,23 @@
         cardsContainer.innerHTML = serviceList
           .map(
             (s) => `
-    <div class="service-card" id="card-${s.id}">
-      <div class="card-header">
-        <div class="card-title">
-          <h3>${s.room}</h3>
-          <p>${s.ident || (s.type === "wall" ? "Parede" : "Forro")}</p>
-        </div>
-        <div class="badge">${s.type === "wall" ? "Parede" : "Forro"}</div>
-      </div>
-      <div class="card-details">
-        <span>Área: <strong>${s.area.toFixed(2)} m²</strong></span>
-        <span>Lã: <strong>${s.insulation ? "Sim" : "Não"}</strong></span>
-      </div>
-      <div class="card-actions">
-        <button class="btn-action btn-delete" onclick="removerServico(${s.id})">Excluir</button>
-      </div>
-    </div>
-  `,
+              <div class="service-card" id="card-${s.id}">
+                <div class="card-header">
+                  <div class="card-title">
+                    <h3>${s.room}</h3>
+                    <p>${s.ident || (s.type === "wall" ? "Parede" : "Forro")}</p>
+                  </div>
+                  <div class="badge">${s.type === "wall" ? "Parede" : "Forro"}</div>
+                </div>
+                <div class="card-details">
+                  <span>Área: <strong>${s.area.toFixed(2)} m²</strong></span>
+                  <span>Lã: <strong>${s.insulation ? "Sim" : "Não"}</strong></span>
+                </div>
+                <div class="card-actions">
+                  <button class="btn-action btn-delete" onclick="removerServico(${s.id})">Excluir</button>
+                </div>
+              </div>
+            `,
           )
           .join("");
 
@@ -457,7 +475,8 @@
       // --- CÁLCULO FINAL DA TABELA (SOMA DE TUDO) ---
 
       function recalcularTabelaGeral() {
-        const iMaoDeObra = document.querySelector("#i_maodeobra") || "undefined";
+        const iMaoDeObra =
+          document.querySelector("#i_maodeobra") || "undefined";
         const iSafety = document.querySelector("#i_margem") || "undefined";
         const totaisMateriais = {};
         let totalMaoDeObra = 0;
@@ -482,7 +501,10 @@
                   safety: safety,
                 });
 
-              console.log(`\n\n\n${s.type === "ceiling" ? "ceilingData" : "wallData"}: `, data);
+          console.log(
+            `\n\n\n${s.type === "ceiling" ? "ceilingData" : "wallData"}: `,
+            data,
+          );
 
           // Aqui você deve mapear os itens (como fizemos antes) e somar no objeto totaisMateriais
           // Exemplo simplificado:
@@ -493,120 +515,124 @@
           totalMaoDeObra += s.area * valorMaoObraM2;
         });
 
-        function renderizarTabela( materiais, maodeora ) {
+        function renderizarTabela(materiais, maodeora) {
           let items = [];
 
-        if (serviceType === "ceiling") {
-          // Mapeamento dos itens do Forro
-          items = [
-            {
-              desc: "Placa Drywall ST",
-              count: data.boards.drywallSheets,
-              value: 38.9,
-            },
-            {
-              desc: "Tabica",
-              count: data.framing.perimeterTracks,
-              value: 24.9,
-            },
-            {
-              desc: "Perfil Canaleta F530",
-              count: data.framing.f530Profiles,
-              value: 19.9,
-            },
-            { desc: "Tirante", count: data.framing.suspensionKits, value: 2.5 },
-            {
-              desc: "Regulador",
-              count: data.framing.suspensionKits,
-              value: 1.49,
-            },
-            { desc: "L-Fix", count: data.framing.suspensionKits, value: 1.5 },
-            {
-              desc: "Par. Lentilha (Cento)",
-              count: Math.ceil(data.fixings.framingScrews / 100),
-              value: 12.0,
-            },
-            {
-              desc: "Par. GN25 (Cento)",
-              count: Math.ceil(data.fixings.drywallScrews / 100),
-              value: 18.0,
-            },
-            {
-              desc: "Parafuso / Bucha n°6",
-              count: data.fixings.wallPlugsAndScrews,
-              value: 0.5,
-            },
-            {
-              desc: "Fita Telada (m)",
-              count: data.finishing.jointTapeMeters,
-              value: 1.2,
-            },
-            {
-              desc: "Massa p/ Drywall (kg)",
-              count: data.finishing.jointCompoundKg,
-              value: 8.0,
-            },
-          ];
-        } else {
-          // Mapeamento dos itens da parede
-          items = [
-            {
-              desc: "Placa Drywall ST",
-              count: data.boards.drywallSheets,
-              value: 38.9,
-            }, // Preços fictícios
-            {
-              desc: "Guia 48mm",
-              count: data.metalFraming.runners3m,
-              value: 24.67,
-            },
-            {
-              desc: "Montante 48mm",
-              count: data.metalFraming.studs3m,
-              value: 29.6,
-            },
-            {
-              desc: "Lã de Vidro/Pet (m²)",
-              count: data.insulation.insulationM2,
-              value: 15.0,
-            },
-            {
-              desc: "Par. Lentilha (Cento)",
-              count: Math.ceil(data.fixings.framingScrews / 100),
-              value: 12.0,
-            },
-            {
-              desc: "Par. GN25 (Cento)",
-              count: Math.ceil(data.fixings.drywallScrews / 100),
-              value: 18.0,
-            },
-            {
-              desc: "Parafuso / Bucha n°6",
-              count: data.fixings.wallAnchorsAndScrews,
-              value: 0.5,
-            },
-            {
-              desc: "Fita Telada (m)",
-              count: data.finishing.jointTapeMeters,
-              value: 1.2,
-            },
-            {
-              desc: "Massa p/ Drywall (kg)",
-              count: data.finishing.jointCompoundKg,
-              value: 8.0,
-            },
-          ];
-        }
+          if (serviceTypeHidden === "ceiling") {
+            // Mapeamento dos itens do Forro
+            items = [
+              {
+                desc: "Placa Drywall ST",
+                count: data.boards.drywallSheets,
+                value: 38.9,
+              },
+              {
+                desc: "Tabica",
+                count: data.framing.perimeterTracks,
+                value: 24.9,
+              },
+              {
+                desc: "Perfil Canaleta F530",
+                count: data.framing.f530Profiles,
+                value: 19.9,
+              },
+              {
+                desc: "Tirante",
+                count: data.framing.suspensionKits,
+                value: 2.5,
+              },
+              {
+                desc: "Regulador",
+                count: data.framing.suspensionKits,
+                value: 1.49,
+              },
+              { desc: "L-Fix", count: data.framing.suspensionKits, value: 1.5 },
+              {
+                desc: "Par. Lentilha (Cento)",
+                count: Math.ceil(data.fixings.framingScrews / 100),
+                value: 12.0,
+              },
+              {
+                desc: "Par. GN25 (Cento)",
+                count: Math.ceil(data.fixings.drywallScrews / 100),
+                value: 18.0,
+              },
+              {
+                desc: "Parafuso / Bucha n°6",
+                count: data.fixings.wallPlugsAndScrews,
+                value: 0.5,
+              },
+              {
+                desc: "Fita Telada (m)",
+                count: data.finishing.jointTapeMeters,
+                value: 1.2,
+              },
+              {
+                desc: "Massa p/ Drywall (kg)",
+                count: data.finishing.jointCompoundKg,
+                value: 8.0,
+              },
+            ];
+          } else {
+            // Mapeamento dos itens da parede
+            items = [
+              {
+                desc: "Placa Drywall ST",
+                count: data.boards.drywallSheets,
+                value: 38.9,
+              }, // Preços fictícios
+              {
+                desc: "Guia 48mm",
+                count: data.metalFraming.runners3m,
+                value: 24.67,
+              },
+              {
+                desc: "Montante 48mm",
+                count: data.metalFraming.studs3m,
+                value: 29.6,
+              },
+              {
+                desc: "Lã de Vidro/Pet (m²)",
+                count: data.insulation.insulationM2,
+                value: 15.0,
+              },
+              {
+                desc: "Par. Lentilha (Cento)",
+                count: Math.ceil(data.fixings.framingScrews / 100),
+                value: 12.0,
+              },
+              {
+                desc: "Par. GN25 (Cento)",
+                count: Math.ceil(data.fixings.drywallScrews / 100),
+                value: 18.0,
+              },
+              {
+                desc: "Parafuso / Bucha n°6",
+                count: data.fixings.wallAnchorsAndScrews,
+                value: 0.5,
+              },
+              {
+                desc: "Fita Telada (m)",
+                count: data.finishing.jointTapeMeters,
+                value: 1.2,
+              },
+              {
+                desc: "Massa p/ Drywall (kg)",
+                count: data.finishing.jointCompoundKg,
+                value: 8.0,
+              },
+            ];
+          }
 
-        let htmlTbody = "";
-        let valorTotalMateriais = 0;
+          let htmlTbody = "";
+          let valorTotalMateriais = 0;
 
-        // monta a tabela com os materiais
-        items.forEach((item) => {
-          const totalItem = item.count * item.value;
-          valorTotalMateriais += totalItem;
+          // monta a tabela com os materiais
+          items.forEach((item) => {
+            const totalItem = item.count * item.value;
+            valorTotalMateriais += totalItem;
 
-          htmlTbody += `
+            htmlTbody += `
             <tr>
             <td class="td-qtd">${item.count}</td>
               <td class="td-desc">${item.desc}</td>
@@ -614,16 +640,16 @@
               <td class="bold">${_$(totalItem)}</td>
             </tr>
           `;
-        });
+          });
 
-        // Cálculo da Área e Mão de Obra
-        const areaM2 = width * length;
-        const totalMaoDeObra = areaM2 * valorUnitMaoDeObra;
-        const totalGeral = valorTotalMateriais + totalMaoDeObra;
+          // Cálculo da Área e Mão de Obra
+          const areaM2 = width * length;
+          const totalMaoDeObra = areaM2 * valorUnitMaoDeObra;
+          const totalGeral = valorTotalMateriais + totalMaoDeObra;
 
-        // Linha da Mão de Obra
-        if (valorUnitMaoDeObra) {
-          htmlTbody += `
+          // Linha da Mão de Obra
+          if (valorUnitMaoDeObra) {
+            htmlTbody += `
             <tr>
               <td class="td-qtd">${Math.ceil(areaM2.toFixed(2))} m²</td>
               <td class="td-desc">Mão de Obra (Instalação)</td>
@@ -631,18 +657,18 @@
               <td class="bold">${_$(totalMaoDeObra)}</td>
             </tr>
           `;
-        }
+          }
 
-        let htmlTfoot = "";
+          let htmlTfoot = "";
 
-        // linha para total dos materiais
-        htmlTfoot += `
+          // linha para total dos materiais
+          htmlTfoot += `
           <tr>
             <td colspan="4" id="holder_materiais">Valor dos Materiais <t class='bold'>${brlFormat.format(valorTotalMateriais)}</t></td>
           </tr>
         `;
-        // linha para valor total geral estimado
-        htmlTfoot += `
+          // linha para valor total geral estimado
+          htmlTfoot += `
           <tr>
             <td colspan="4" class="tfoot-total">
               Total Estimado: <strong id="valor_total_geral">${brlFormat.format(totalGeral)}</strong>
@@ -650,15 +676,12 @@
           </tr>
         `;
 
-        tbody.innerHTML = htmlTbody;
-        tfoot.innerHTML = htmlTfoot;
-      
-
+          tbody.innerHTML = htmlTbody;
+          tfoot.innerHTML = htmlTfoot;
         }
 
         // Renderiza a tabela do index.html com os totais acumulados
         renderizarTabela(totaisMateriais, totalMaoDeObra);
-        
       }
     </script>
   </body>
