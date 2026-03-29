@@ -513,27 +513,26 @@
                 materiais.area = (materiais.area || 0) + data?.area;
                 materiais.perimeter =
                   (materiais.perimeter || 0) + data?.perimeter;
-                materiais.f530Profiles += data.framing.f530Profiles;
       */
           materiais.drywallSheets += data.boards.drywallSheets;
+          materiais.drywallScrews += data.fixings.drywallScrews;
+          materiais.framingScrews += data.fixings.framingScrews;
+          materiais.jointTapeMeters += data.finishing.jointTapeMeters;
+          materiais.jointCompoundKg += data.finishing.jointCompoundKg;
 
           if (s.type === "ceiling") {
             materiais.f530Profiles += data.framing.f530Profiles;
             materiais.perimeterTracks += data.framing.perimeterTracks;
-
             materiais.area += data.dimensions.area;
             materiais.perimeter += data.dimensions.perimeter;
-            materiais.f530Profiles += data.framing.f530Profiles;
-            materiais.perimeterTracks += data.framing.perimeterTracks;
             materiais.suspensionKits += data.framing.suspensionKits;
-            materiais.drywallScrews += data.fixings.drywallScrews;
-            materiais.framingScrews += data.fixings.framingScrews;
             materiais.wallPlugsAndScrews += data.fixings.wallPlugsAndScrews;
-            materiais.jointTapeMeters += data.finishing.jointTapeMeters;
-            materiais.jointCompoundKg += data.finishing.jointCompoundKg;
           } else {
             materiais.runners3m += data.metalFraming.runners3m;
             materiais.studs3m += data.metalFraming.studs3m;
+            materiais.area += data.dimensions.totalBoardArea;
+            materiais.insulationM2 += data.insulation.insulationM2;
+            materiais.wallPlugsAndScrews += data.fixings.wallAnchorsAndScrews;
           }
 
           console.log(
