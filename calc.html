@@ -272,6 +272,8 @@
       import { insulationSwitch } from "./components/insulationSwitch.js";
       import { $, $$ } from "./helpers/helpers.js";
       import LS from "./ls.js";
+      import { serviceCard } from "./components/layout/layout.js";
+      import { trash, Wall, Ceiling } from "./assets/icons.js";
 
       // --- ESTADO GLOBAL ---
       let serviceList = []; // Guarda todos os serviços adicionados
@@ -331,7 +333,7 @@
             <input type="number" class="input-length" step="0.01" value="0">
           </label>
           <btn-remove class="btn-remove" onclick="this.parentElement.remove(); atualizarAreaPreview();">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256" class="text-red-600"><path d="M200,56V208a8,8,0,0,1-8,8H64a8,8,0,0,1-8-8V56Z" opacity="0.2"></path><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"></path></svg>
+            ${trash}
           </btn-remove>
         `;
         container.appendChild(row);
@@ -358,7 +360,7 @@
             <input type="number" class="op-height" step="0.01" value=${label === "Porta" ? "2.10" : "1.50"}>
           </label>
           <btn-remove class="btn-remove" onclick="this.parentElement.remove(); atualizarAreaPreview();">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256" class="text-red-600"><path d="M200,56V208a8,8,0,0,1-8,8H64a8,8,0,0,1-8-8V56Z" opacity="0.2"></path><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"></path></svg>
+            ${trash}
           </btn-remove>
         `;
         container.appendChild(div);
@@ -451,26 +453,7 @@
         }
 
         cardsContainer.innerHTML = serviceList
-          .map(
-            (s) => `
-              <service-card class="service-card" id="card-${s.id}">
-                <header class="card-header">
-                  <div class="card-title">
-                    <h3>${s.room}</h3>
-                    <p>${s.ident || (s.type === "wall" ? "Parede" : "Forro")}</p>
-                  </div>
-                  <div class="badge">${s.type === "wall" ? "Parede" : "Forro"}</div>
-                </header>
-                <card-details class="card-details">
-                  <span>Área: <strong>${s.area.toFixed(2)} m²</strong></span>
-                  <span>Lã: <strong>${s.insulation ? "Sim" : "Não"}</strong></span>
-                </card-list>
-                <card-actions class="card-actions">
-                  <button class="btn-action btn-delete" onclick="removerServico(${s.id})">Excluir</button>
-                </card-actions>
-              </service-card>
-            `,
-          )
+          .map((s) => serviceCard(s))
           .join("");
 
         recalcularTabelaGeral();
@@ -534,9 +517,9 @@
           // Aqui você deve mapear os itens (como fizemos antes) e somar no objeto totaisMateriais
           // Exemplo simplificado:
           // totaisMateriais["Placa Drywall ST"] = (totaisMateriais["Placa Drywall ST"] || 0) + data.boards.drywallSheets;
-          totaisMateriais.area = (totaisMateriais.area || 0) + data.boards.area;
+          totaisMateriais.area = (totaisMateriais.area || 0) + data?.area;
           totaisMateriais.perimeter =
-            (totaisMateriais.perimeter || 0) + data.perimeter;
+            (totaisMateriais.perimeter || 0) + data?.perimeter;
           totaisMateriais.drywallSheets += data.boards.drywallSheets;
           totaisMateriais.f530Profiles += data.framing.f530Profiles;
 
