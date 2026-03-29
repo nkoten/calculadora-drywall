@@ -168,7 +168,9 @@
                   />
                 </label>
                 <label>
-                  <t class="label-t-s" id="label_height-length">Comprimento (m)</t>
+                  <t class="label-t-s" id="label_height-length"
+                    >Comprimento (m)</t
+                  >
                   <input
                     type="number"
                     placeholder="0.00"
@@ -267,8 +269,8 @@
 
     <script type="module">
       import calculateCeiling from "./scripts/calculators/calculateCeiling.js";
-      import { insulationSwitch } from './components/insulationSwitch.js';
-      import { $, $$, } from './helpers/helpers.js';
+      import { insulationSwitch } from "./components/insulationSwitch.js";
+      import { $, $$ } from "./helpers/helpers.js";
       import LS from "./ls.js";
 
       // --- ESTADO GLOBAL ---
@@ -276,8 +278,7 @@
       let medidasExtrasCount = 0;
       const ID = Date.now();
       const dwID = `dw-service:${ID}`;
-      const dwService = {id: dwID, services: []};
-
+      const dwService = { id: dwID, services: [] };
 
       // Elementos do DOM
       const serviceForm = $("#serviceForm");
@@ -296,19 +297,21 @@
           btn.classList.add("active");
           serviceTypeHidden.value = btn.dataset.service;
           // serviceTypeHidden.value = btn.getAttribute("service");
-          console.log( "changingTo: ", btn.dataset.service, serviceTypeHidden.value );
+          console.log(
+            "changingTo: ",
+            btn.dataset.service,
+            serviceTypeHidden.value,
+          );
 
           // Ajusta textos dinamicamente
           const isWall = btn.dataset.service === "wall";
           // const isWall = btn.getAttribute("service") === "wall";
-          $("insulation-switch").style.display = isWall
-            ? "flex"
-            : "none";
+          $("insulation-switch").style.display = isWall ? "flex" : "none";
           $("#label_height-length").innerText = isWall
             ? "Altura (m)"
             : "Comprimento (m)";
-          // adiciona o input para inserir lã 
-          $( "insulation-switch" ).innerHTML = isWall ? insulationSwitch : "";
+          // adiciona o input para inserir lã
+          $("insulation-switch").innerHTML = isWall ? insulationSwitch : "";
           atualizarAreaPreview();
         });
       });
@@ -393,8 +396,7 @@
         });
 
         const areaLiquida = Math.max(0, areaBruta - areaDesconto);
-        $("#currentAreaCalculated").innerText =
-          `${areaLiquida.toFixed(2)} m²`;
+        $("#currentAreaCalculated").innerText = `${areaLiquida.toFixed(2)} m²`;
         $("#serviceCount").innerText =
           `${serviceList.length} serviços na lista`;
       }
@@ -421,9 +423,7 @@
             serviceTypeHidden.value !== "ceiling"
               ? $("#i_insulation_toggle").checked
               : "undefined",
-          area: parseFloat(
-            $("#currentAreaCalculated").innerText,
-          ),
+          area: parseFloat($("#currentAreaCalculated").innerText),
           // Guardamos os dados brutos para recálculo de materiais se necessário
           width: parseFloat($(".input-width").value),
           length: parseFloat($(".input-length").value),
@@ -484,15 +484,36 @@
       // --- CÁLCULO FINAL DA TABELA (SOMA DE TUDO) ---
 
       function recalcularTabelaGeral() {
-        const iMaoDeObra =
-          $("#i_maodeobra") || "undefined";
+        // vevrifica se existe mão de obra
+        const iMaoDeObra = $("#i_maodeobra") || "undefined";
+        // verifica se tem margem de perda
         const iSafety = $("#i_margem") || "undefined";
-        const totaisMateriais = {};
+        // define a variavel para armazenar os materiais
+        const totaisMateriais = {
+          area: 0,
+          perimeter: 0,
+          drywallSheets: 0,
+          f530Profiles: 0,
+          perimeterTracks: 0,
+          suspensionKits: 0,
+          wallPlugsAndScrews: 0,
+          wallAnchorsAndScrews: 0,
+          framingScrews: 0,
+          drywallScrews: 0,
+          jointTapeMeters: 0,
+          jointCompoundKg: 0,
+          /* wall */
+          runners3m: 0,
+          studs3m: 0,
+          insulationM2: 0,
+        };
+        // define a variavel para armazenar o total U
         let totalMaoDeObra = 0;
         const valorMaoObraM2 =
           iMaoDeObra !== "undefined" ? parseFloat(iMaoDeObra.value) : 0;
         const margemPercentual =
           iSafety !== "undefined" ? parseFloat(iSafety.value) : 0;
+        // calcula a margem passada como porcentagem
         const safety = 1 + margemPercentual / 100;
 
         serviceList.forEach((s) => {
@@ -510,16 +531,23 @@
                   safety: safety,
                 });
 
-          console.log(
-            `\n\n\n${s.type === "ceiling" ? "ceilingData" : "wallData"}: `,
-            data,
-          );
-
           // Aqui você deve mapear os itens (como fizemos antes) e somar no objeto totaisMateriais
           // Exemplo simplificado:
-          const placaQtd = data.boards.drywallSheets;
-          totaisMateriais["Placa Drywall ST"] =
-            (totaisMateriais["Placa Drywall ST"] || 0) + placaQtd;
+          // totaisMateriais["Placa Drywall ST"] = (totaisMateriais["Placa Drywall ST"] || 0) + data.boards.drywallSheets;
+          totaisMateriais.area = (totaisMateriais.area || 0) + data.boards.area;
+          totaisMateriais.perimeter =
+            (totaisMateriais.perimeter || 0) + data.perimeter;
+          totaisMateriais.drywallSheets += data.boards.drywallSheets;
+          totaisMateriais.f530Profiles += data.framing.f530Profiles;
+
+          console.log(
+            `recalcularTabelaGeral() => : data`,
+            data,
+            `\n\n\n${s.type === "ceiling" ? "ceilingData" : "wallData"}: `,
+            data,
+            "\ntotaisMateriais: ",
+            totaisMateriais,
+          );
 
           totalMaoDeObra += s.area * valorMaoObraM2;
         });
@@ -528,8 +556,8 @@
           let items = [];
 
           if (serviceTypeHidden.value === "ceiling") {
-            console.log( "\n\n\nisCeiling" );
-            console.log( "data is: ", data );
+            console.log("\n\n\nisCeiling");
+            console.log("data is: ", data);
             // Mapeamento dos itens do Forro
             items = [
               {
@@ -585,7 +613,7 @@
               },
             ];
           } else {
-            console.log( "\n\n\nisWall" );
+            console.log("\n\n\nisWall");
             // Mapeamento dos itens da parede
             items = [
               {
@@ -695,12 +723,13 @@
         // Renderiza a tabela do index.html com os totais acumulados
         renderizarTabela(totaisMateriais, totalMaoDeObra);
       }
-    
-      addEventListener( "load", _ => {
-        console.log( "serviceType: ", serviceTypeHidden.value );
+
+      addEventListener("load", (_) => {
+        console.log("serviceType: ", serviceTypeHidden.value);
         // remove a opção de inserir lã para Forro
-        $("insulation-switch").style.display = serviceTypeHidden.value === "ceiling" ? "none" : "flex";
-      } );
+        $("insulation-switch").style.display =
+          serviceTypeHidden.value === "ceiling" ? "none" : "flex";
+      });
     </script>
   </body>
 </html>

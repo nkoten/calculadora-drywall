@@ -1,6 +1,6 @@
  Projeto: calculadora-drywall
 
-- [ ] ao abrir o menu de calculos já cria o dw-service[] com id unico
+- [x] ao abrir o menu de calculos já cria o dw-service[] com id unico
 - [ ] ao clicar em salvar o novo serviço é adicionado ao dw-service e o dw-service é salvo em ls
 - [ ] antes de salvar o novo serviço é verificado se existe um dw-service com o mesmo id, y: usa o dw-service como base : usa [], então o novo serviço é adicionado em dw-service
 - [ ] o serviço é salvo com [id, nome do comodo, ident, largura, length, sType, labor,]
