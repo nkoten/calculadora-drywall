@@ -146,13 +146,7 @@
             />
           </label>
 
-          <insulation-switch class="switch-field">
-            <!-- <switch-label>Incluir Lã de Vidro/Pet?</switch-label> -->
-            <!-- <label class="switch"> -->
-            <!--   <input type="checkbox" id="i_insulation_toggle" /> -->
-            <!--   <span class="slider"></span> -->
-            <!-- </label> -->
-          </insulation-switch>
+          <insulation-switch class="switch-field"></insulation-switch>
 
           <main-measures-container class="main-measures-container">
             <header>
@@ -281,6 +275,7 @@
       const ID = Date.now();
       const dwID = `dw-service:${ID}`;
       const dwService = { id: dwID, services: [] };
+      let servicoSendoEditadoId = null; // null = novo serviço
 
       // Elementos do DOM
       const serviceForm = $("#serviceForm");
@@ -412,9 +407,6 @@
       // --- Salva e renderiza os cards (cite: 6.jpg) ---
       serviceForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        // if (LS.get(dwID)) {
-        //   dwService.services = [...LS.get(dwID)];
-        // }
 
         const servico = {
           id: Date.now(),
@@ -470,9 +462,9 @@
         // vevrifica se existe mão de obra
         const iMaoDeObra = $("#i_maodeobra") || "undefined";
         // verifica se tem margem de perda
-        const iSafety = $("#i_margem") || "undefined";
+        const iSafety = 1 + parseFloat($("#i_margem")?.value || 0) / 100;
         // define a variavel para armazenar os materiais
-        const totaisMateriais = {
+        const materiais = {
           area: 0,
           perimeter: 0,
           drywallSheets: 0,
@@ -514,22 +506,32 @@
                   safety: safety,
                 });
 
-          // Aqui você deve mapear os itens (como fizemos antes) e somar no objeto totaisMateriais
+          /*
+          // Aqui você deve mapear os itens (como fizemos antes) e somar no objeto materiais
           // Exemplo simplificado:
-          // totaisMateriais["Placa Drywall ST"] = (totaisMateriais["Placa Drywall ST"] || 0) + data.boards.drywallSheets;
-          totaisMateriais.area = (totaisMateriais.area || 0) + data?.area;
-          totaisMateriais.perimeter =
-            (totaisMateriais.perimeter || 0) + data?.perimeter;
-          totaisMateriais.drywallSheets += data.boards.drywallSheets;
-          totaisMateriais.f530Profiles += data.framing.f530Profiles;
+          // materiais["Placa Drywall ST"] = (materiais["Placa Drywall ST"] || 0) + data.boards.drywallSheets;
+          materiais.area = (materiais.area || 0) + data?.area;
+          materiais.perimeter =
+            (materiais.perimeter || 0) + data?.perimeter;
+          materiais.f530Profiles += data.framing.f530Profiles;
+*/
+          materiais.drywallSheets += data.boards.drywallSheets;
+
+          if (s.type === "ceiling") {
+            materiais.f530Profiles += data.framing.f530Profiles;
+            materiais.perimeterTracks += data.framing.perimeterTracks;
+          } else {
+            materiais.runners3m += data.metalFraming.runners3m;
+            materiais.studs3m += data.metalFraming.studs3m;
+          }
 
           console.log(
             `recalcularTabelaGeral() => : data`,
             data,
             `\n\n\n${s.type === "ceiling" ? "ceilingData" : "wallData"}: `,
             data,
-            "\ntotaisMateriais: ",
-            totaisMateriais,
+            "\nmateriais: ",
+            materiais,
           );
 
           totalMaoDeObra += s.area * valorMaoObraM2;
@@ -704,7 +706,7 @@
         }
 
         // Renderiza a tabela do index.html com os totais acumulados
-        renderizarTabela(totaisMateriais, totalMaoDeObra);
+        renderizarTabela(materiais, totalMaoDeObra);
       }
 
       addEventListener("load", (_) => {
