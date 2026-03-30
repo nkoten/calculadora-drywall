@@ -185,7 +185,22 @@ const App = () => {
 
   const totalGeral = tableRows.reduce((sum, r) => sum + r.qty * r.price, 0);
 
-  return (
+  return ( <>
+    {/* --- print header --- */}
+    <div className="hidden print:block mb-8 border-b-2 border-[#152b54] pb-4">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-[#152b54]">Orçamento de Drywall</h1>
+          <p className="text-sm text-slate-500">Gerado em: {new Date().toLocaleDateString('pt-BR')}</p>
+        </div>
+        <div className="text-right">
+          <p className="font-bold">Calculadora Drywall Pro</p>
+          <p className="text-xs">Relatório Técnico de Materiais</p>
+        </div>
+      </div>
+    </div>
+    {/* --- end print header --- */}
+
     <div className="min-h-screen bg-white">
       <main className="p-[10px] max-w-4xl mx-auto">
         <header className="flex items-center justify-center h-[78px]">
@@ -273,6 +288,13 @@ const App = () => {
             </tfoot>
           </table>
         </div>
+
+        {/* --- legal-notice on print --- */}
+        <p class="legal-notice" forprint>
+          * Os valores dos materiais são estimativos e podem variar de acordo com a
+          loja e a data da compra.
+        </p>
+        {/* --- end legal-notice on print --- */}
 
         <button
           className="w-full h-[56px] bg-[#00559c] text-white rounded-[1.1rem] mt-6 no-print"
@@ -448,7 +470,7 @@ const App = () => {
         </div>
       )}
     </div>
-  );
+  </> );
 };
 
 const root = createRoot(document.getElementById("app_root"));
