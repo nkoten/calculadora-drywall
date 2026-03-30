@@ -868,10 +868,10 @@ visor-area > right {
 }
 
 .service-card {
-  background: white;
-  border: 1px solid #e4e4e7;
-  border-radius: 10px;
-  padding: 15px;
+  background: var(--slate-50);
+  border: 1px solid #e4e4e700;
+  border-radius: 1.5rem;
+  padding: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
@@ -880,19 +880,28 @@ visor-area > right {
   justify-content: space-between;
   align-items: start;
   border-bottom: 1px solid #f4f4f5;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
+  height: auto;
 }
 .card-title h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--indigo-600);
 }
 .card-title p {
   margin: 0;
-  font-size: 13px;
-  color: #71717a;
+  font-size: 0.8rem;
+  color: var(--slate-500);
 }
 
+.card-header .badge {
+  display: grid;
+  place-items: center;
+  background: var(--indigo-100);
+  color: var(--indigo-600);
+  border-radius: 1rem;
+  padding: 0.5rem 1rem;
+}
 .card-details {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -905,18 +914,24 @@ visor-area > right {
   display: flex;
   justify-content: end;
   gap: 10px;
-  margin-top: 15px;
   border-top: 1px solid #f4f4f5;
-  padding-top: 10px;
 }
 .btn-action {
-  padding: 6px 12px;
+  padding: 0.5rem;
   border: 1px solid #e4e4e7;
   border-radius: 6px;
   background: white;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
+  height: auto;
+  background: #29f5;
+  display: grid;
+  place-items: center;
+  /* padding: 1rem; */
+  border-radius: 55rem;
+  width: fit-content;
+  aspect-ratio: 1;
 }
 .btn-edit {
   color: #2563eb;

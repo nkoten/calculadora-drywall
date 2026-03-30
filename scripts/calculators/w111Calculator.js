@@ -155,9 +155,9 @@ lã: insulation.insulationM2
 */
 
 // How to use:
-const myOfficeCeiling = calculateWall({
+/* const myOfficeCeiling = calculateWall({
   wallWidth: 4,
   wallHeight: 5,
   labor: 100,
 });
-console.log("calculateWall: ", myOfficeCeiling);
+console.log("calculateWall: ", myOfficeCeiling); */

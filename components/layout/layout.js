@@ -1,6 +1,6 @@
 /**
  * --- layout components --- */
-import { trash } from "../../assets/icons.js";
+import { trash, pencil } from "../../assets/icons.js";
 
 export const serviceCard = (s) => `
   <service-card class="service-card" id="card-${s.id}">
@@ -16,7 +16,12 @@ export const serviceCard = (s) => `
       <span>Lã: <strong>${s.insulation ? "Sim" : "Não"}</strong></span>
     </card-list>
     <card-actions class="card-actions">
-      <button class="btn-action btn-delete" onclick="removerServico(${s.id})">Excluir</button>
+      <button class="btn-action btn-edit" onclick="editarServico(${s.id})">
+        ${pencil}
+      </button>
+      <button class="btn-action btn-delete" onclick="removerServico(${s.id})">
+        ${trash}
+      </button>
     </card-actions>
   </service-card>
 `;
