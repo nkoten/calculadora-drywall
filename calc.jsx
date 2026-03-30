@@ -290,7 +290,7 @@ const App = () => {
         </div>
 
         {/* --- legal-notice on print --- */}
-        <p class="legal-notice" forprint>
+        <p class="legal-notice hidden" forprint>
           * Os valores dos materiais são estimativos e podem variar de acordo com a
           loja e a data da compra.
         </p>
