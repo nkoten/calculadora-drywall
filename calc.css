@@ -947,10 +947,31 @@ visor-area > right {
 /** 
  * --- @media print --- */
 @media print {
-  [noprint] {
+  * {
+    /* Força a renderização de cores e sombras no Chrome, Safari e Edge */
+    -webkit-print-color-adjust: exact !important;
+    /* Força para o Firefox */
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Garante que a tabela ocupe toda a largura da página A4 */
+  .card, table {
+    width: 100% !important;
+    box-shadow: none !important; /* Remove sombras que podem borrar na impressão */
+    margin: 0 !important;
+  }
+  
+  /* Esconde elementos indesejados que marcámos com a classe no-print */
+  .no-print, .fab-button, .drawer-overlay, [noprint] {
     display: none !important;
   }
   [forprint] {
     display: block !important;
   }
 }
+

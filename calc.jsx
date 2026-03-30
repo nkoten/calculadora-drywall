@@ -107,7 +107,7 @@ const App = () => {
     };
 
     serviceList.forEach((s) => {
-      const safety = 1.05; // 5% margem
+      const safety = 1.00 // 5% margem
       // Usamos a primeira medida ou a soma delas para o calculador base
       const width = s.measures[0].width;
       const length = s.measures[0].length;
