@@ -7,7 +7,6 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <script src="calculateWall.js"></script>
     <script src="./global.js" defer></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -263,6 +262,7 @@
 
     <script type="module">
       import calculateCeiling from "./scripts/calculators/calculateCeiling.js";
+      import calculateWall from "./scripts/calculators/w111Calculator.js";
       import { insulationSwitch } from "./components/insulationSwitch.js";
       import { $, $$ } from "./helpers/helpers.js";
       import LS from "./ls.js";
@@ -293,7 +293,6 @@
           serviceToggleBtns.forEach((b) => b.classList.remove("active"));
           btn.classList.add("active");
           serviceTypeHidden.value = btn.dataset.service;
-          // serviceTypeHidden.value = btn.getAttribute("service");
           console.log(
             "changingTo: ",
             btn.dataset.service,
@@ -302,7 +301,6 @@
 
           // Ajusta textos dinamicamente
           const isWall = btn.dataset.service === "wall";
-          // const isWall = btn.getAttribute("service") === "wall";
           $("insulation-switch").style.display = isWall ? "flex" : "none";
           $("#label_height-length").innerText = isWall
             ? "Altura (m)"
@@ -460,32 +458,40 @@
 
       function recalcularTabelaGeral() {
         // vevrifica se existe mão de obra
-        const iMaoDeObra = $("#i_maodeobra") || "undefined";
+        const iLabor = $("#i_labor") || "undefined";
         // verifica se tem margem de perda
         const iSafety = 1 + parseFloat($("#i_margem")?.value || 0) / 100;
         // define a variavel para armazenar os materiais
         const materiais = {
-          area: 0,
-          perimeter: 0,
-          drywallSheets: 0,
-          f530Profiles: 0,
-          perimeterTracks: 0,
-          suspensionKits: 0,
-          wallPlugsAndScrews: 0,
-          wallAnchorsAndScrews: 0,
-          framingScrews: 0,
-          drywallScrews: 0,
-          jointTapeMeters: 0,
-          jointCompoundKg: 0,
-          /* wall */
-          runners3m: 0,
-          studs3m: 0,
-          insulationM2: 0,
+          dimensions: {
+            area: 0,
+            perimeter: 0,
+          },
+          boards: { drywallSheets: 0, },
+          framing: { 
+            f530Profiles: 0,
+            perimeterTracks: 0,
+            suspensionKits: 0,
+            runners3m: 0,
+            studs3m: 0,
+          },
+          insulation: {
+            insulationM2: 0,
+          },
+          fixings: { 
+            drywallScrews: 0,
+            framingScrews: 0,
+            wallPlugsAndScrews: 0,
+          },
+          finishing: {
+            jointTapeMeters: 0,
+            jointCompoundKg: 0,
+          },
         };
         // define a variavel para armazenar o total U
-        let totalMaoDeObra = 0;
+        let totalLabor = 0;
         const valorMaoObraM2 =
-          iMaoDeObra !== "undefined" ? parseFloat(iMaoDeObra.value) : 0;
+          iLabor !== "undefined" ? parseFloat(iLabor.value) : 0;
         const margemPercentual =
           iSafety !== "undefined" ? parseFloat(iSafety.value) : 0;
         // calcula a margem passada como porcentagem
@@ -498,41 +504,32 @@
               ? calculateCeiling({
                   width: s.width,
                   length: s.length,
-                  safety: safety,
+                  safety,
                 }).data
               : calculateWall({
-                  wallLength: s.width,
+                  wallWidth: s.width,
                   wallHeight: s.length,
-                  safety: safety,
-                });
+                  safety,
+                }).data;
 
-          /*
-                // Aqui você deve mapear os itens (como fizemos antes) e somar no objeto materiais
-                // Exemplo simplificado:
-                // materiais["Placa Drywall ST"] = (materiais["Placa Drywall ST"] || 0) + data.boards.drywallSheets;
-                materiais.area = (materiais.area || 0) + data?.area;
-                materiais.perimeter =
-                  (materiais.perimeter || 0) + data?.perimeter;
-      */
-          materiais.drywallSheets += data.boards.drywallSheets;
-          materiais.drywallScrews += data.fixings.drywallScrews;
-          materiais.framingScrews += data.fixings.framingScrews;
-          materiais.jointTapeMeters += data.finishing.jointTapeMeters;
-          materiais.jointCompoundKg += data.finishing.jointCompoundKg;
+          materiais.boards.drywallSheets += data.boards.drywallSheets;
+          materiais.fixings.drywallScrews += data.fixings.drywallScrews;
+          materiais.fixings.framingScrews += data.fixings.framingScrews;
+          materiais.finishing.jointTapeMeters += data.finishing.jointTapeMeters;
+          materiais.finishing.jointCompoundKg += data.finishing.jointCompoundKg;
+          materiais.fixings.wallPlugsAndScrews += data.fixings.wallPlugsAndScrews;
 
           if (s.type === "ceiling") {
-            materiais.f530Profiles += data.framing.f530Profiles;
-            materiais.perimeterTracks += data.framing.perimeterTracks;
-            materiais.area += data.dimensions.area;
-            materiais.perimeter += data.dimensions.perimeter;
-            materiais.suspensionKits += data.framing.suspensionKits;
-            materiais.wallPlugsAndScrews += data.fixings.wallPlugsAndScrews;
+            materiais.dimensions.area += data.dimensions.area;
+            materiais.dimensions.perimeter += data.dimensions.perimeter;
+            materiais.framing.perimeterTracks += data.framing.perimeterTracks;
+            materiais.framing.f530Profiles += data.framing.f530Profiles;
+            materiais.framing.suspensionKits += data.framing.suspensionKits;
           } else {
-            materiais.runners3m += data.metalFraming.runners3m;
-            materiais.studs3m += data.metalFraming.studs3m;
-            materiais.area += data.dimensions.totalBoardArea;
-            materiais.insulationM2 += data.insulation.insulationM2;
-            materiais.wallPlugsAndScrews += data.fixings.wallAnchorsAndScrews;
+            materiais.dimensions.area += data.dimensions.totalBoardArea;
+            materiais.framing.runners3m += data.framing.runners3m;
+            materiais.framing.studs3m += data.framing.studs3m;
+            materiais.insulation.insulationM2 += data.insulation.insulationM2;
           }
 
           console.log(
@@ -544,10 +541,10 @@
             materiais,
           );
 
-          totalMaoDeObra += s.area * valorMaoObraM2;
+          totalLabor += s.area * valorMaoObraM2;
         });
 
-        function renderizarTabela(materiais, maodeora) {
+        function renderizarTabela(data, maodeora) {
           let items = [];
 
           if (serviceTypeHidden.value === "ceiling") {
@@ -618,12 +615,12 @@
               }, // Preços fictícios
               {
                 desc: "Guia 48mm",
-                count: data.metalFraming.runners3m,
+                count: data.framing.runners3m,
                 value: 24.67,
               },
               {
                 desc: "Montante 48mm",
-                count: data.metalFraming.studs3m,
+                count: data.framing.studs3m,
                 value: 29.6,
               },
               {
@@ -668,55 +665,55 @@
             valorTotalMateriais += totalItem;
 
             htmlTbody += `
-                  <tr>
-                  <td class="td-qtd">${item.count}</td>
-                    <td class="td-desc">${item.desc}</td>
-                    <td>${_$(item.value)}</td>
-                    <td class="bold">${_$(totalItem)}</td>
-                  </tr>
-                `;
+              <tr>
+                <td class="td-qtd">${item.count}</td>
+                <td class="td-desc">${item.desc}</td>
+                <td>${_$(item.value)}</td>
+                <td class="bold">${_$(totalItem)}</td>
+              </tr>
+            `;
           });
 
           // Cálculo da Área e Mão de Obra
           const areaM2 = width * length;
-          const totalMaoDeObra = areaM2 * valorUnitMaoDeObra;
-          const totalGeral = valorTotalMateriais + totalMaoDeObra;
+          const totalLabor = areaM2 * valorUnitLabor;
+          const totalGeral = valorTotalMateriais + totalLabor;
 
           // Linha da Mão de Obra
-          if (valorUnitMaoDeObra) {
+          if (valorUnitLabor) {
             htmlTbody += `
-                  <tr>
-                    <td class="td-qtd">${Math.ceil(areaM2.toFixed(2))} m²</td>
-                    <td class="td-desc">Mão de Obra (Instalação)</td>
-                    <td class="td-unit">${false ? brlFormat.format(valorUnitMaoDeObra) : ""}</td>
-                    <td class="bold">${_$(totalMaoDeObra)}</td>
-                  </tr>
-                `;
+              <tr>
+                <td class="td-qtd">${Math.ceil(areaM2.toFixed(2))} m²</td>
+                <td class="td-desc">Mão de Obra (Instalação)</td>
+                <td class="td-unit">${false ? brlFormat.format(valorUnitLabor) : ""}</td>
+                <td class="bold">${_$(totalLabor)}</td>
+              </tr>
+            `;
           }
 
           let htmlTfoot = "";
 
           // linha para total dos materiais
           htmlTfoot += `
-                <tr>
-                  <td colspan="4" id="holder_materiais">Valor dos Materiais <t class='bold'>${brlFormat.format(valorTotalMateriais)}</t></td>
-                </tr>
-              `;
+            <tr>
+              <td colspan="4" id="holder_materiais">Valor dos Materiais <t class='bold'>${brlFormat.format(valorTotalMateriais)}</t></td>
+            </tr>
+          `;
           // linha para valor total geral estimado
           htmlTfoot += `
-                <tr>
-                  <td colspan="4" class="tfoot-total">
-                    Total Estimado: <strong id="valor_total_geral">${brlFormat.format(totalGeral)}</strong>
-                  </td>
-                </tr>
-              `;
+            <tr>
+              <td colspan="4" class="tfoot-total">
+                Total Estimado: <strong id="valor_total_geral">${brlFormat.format(totalGeral)}</strong>
+              </td>
+            </tr>
+          `;
 
           tbody.innerHTML = htmlTbody;
           tfoot.innerHTML = htmlTfoot;
         }
 
         // Renderiza a tabela do index.html com os totais acumulados
-        renderizarTabela(materiais, totalMaoDeObra);
+        renderizarTabela(materiais, totalLabor);
       }
 
       addEventListener("load", (_) => {

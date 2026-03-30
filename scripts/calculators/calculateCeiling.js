@@ -6,10 +6,10 @@ import { ceil } from "./utils/utils.js";
  * @param {Object} options - Objeto de configuração
  * @param {number} options.width - Largura do cômodo em metros
  * @param {number} options.length - Comprimento do cômodo em metros
- * @param {number} options.maodeobra - Valor ou multiplicador da mão de obra
+ * @param {number} options.labor - Valor ou multiplicador da mão de obra
  * @param {number} options.safety - Margem de segurança para quebras oj perdas
  */
-export default function calculateCeiling({ width, length, maodeobra, safety }) {
+export default function calculateCeiling({ width, length, labor, safety }) {
   const area = width * length;
   const perimeter = (width + length) * 2;
   const safetyMargin = safety || 1.0; // para 0% ou 1.05 para 5%
@@ -127,6 +127,6 @@ export default function calculateCeiling({ width, length, maodeobra, safety }) {
 const myOfficeCeiling = calculateCeiling({
   width: 4,
   length: 5,
-  maodeobra: 100,
+  labor: 100,
 });
-console.log(myOfficeCeiling);
+console.log("calculateCeiling", myOfficeCeiling);
