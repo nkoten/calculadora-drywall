@@ -428,7 +428,7 @@ const App = () => {
             </header>
             <form
               id="form"
-              className="bg-white p-4 h-full overflow-y-auto mb-[160px]"
+              className="bg-white p-4 pb-[160px] h-full overflow-y-auto"
               onSubmit={handleSaveService}
             >
               <service-info className="flex flex-col gap-2">
