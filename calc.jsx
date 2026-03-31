@@ -1,6 +1,7 @@
 /** --- imports --- */
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { createRoot } from "react-dom/client";
+import { useReactToPrint } from "react-to-print";
 
 // Importação dos teus utilitários e lógica
 import LS from "./ls.js";
@@ -28,6 +29,16 @@ const App = () => {
     { id: crypto.randomUUID(), width: "", length: "" },
   ]);
   const [openings, setOpenings] = useState([]);
+
+  // referencia para o elemento de impressao
+  const pdfRef = useRef(null);
+
+  // 
+  const dispararImpressao = useReactToPrint({
+    contentRef: pdfRef, // Referência do que imprimir
+    documentTitle: "Resultado_Calculo", // Nome do arquivo PDF
+    onAfterPrint: () => console.log("Impressão finalizada!")
+  });
 
   // --- PERSISTÊNCIA (LS.js) ---
   useEffect(() => {
@@ -411,7 +422,7 @@ const App = () => {
             </header>
             <form
               id="form"
-              className="bg-white p-4 h-full overflow-y-auto"
+              className="bg-white p-4 h-full overflow-y-auto mb-[160px]"
               onSubmit={handleSaveService}
             >
               <service-info className="flex flex-col gap-2">
@@ -439,7 +450,7 @@ const App = () => {
                 </label>
               </service-info>
 
-              <service-selector className="flex border border-slate-300 rounded-[1rem] overflow-hidden p-[.25rem] relative items-center">
+              <service-selector className="flex min-h-[36px] shrink-0 border border-slate-300 rounded-[1rem] overflow-hidden p-[.25rem] relative items-center">
                 <button
                   type="button"
                   className={`btn-select flex-1 p-2 ${serviceType === "ceiling" ? "active" : ""} rounded-[0.9rem_0_0_0.9rem_!important]`}
@@ -545,7 +556,7 @@ const App = () => {
               <button
                 type="submit"
                 form="form"
-                className="btn-save-temp w-full bg-[#18181b] text-white p-4 rounded-xl mt-6"
+                className="btn-save-temp w-full bg-[#00559c] text-white p-4 rounded-xl mt-6"
               >
                 {editingId ? "Atualizar Serviço" : "Salvar Serviço"}
               </button>
