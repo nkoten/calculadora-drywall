@@ -1,0 +1,16 @@
+/**
+ * --- drawer --- */
+.drawer-input {
+  width: 100%;
+  height: 56px;
+  color: var(--text, #666);
+  accent-color: var(--accent, #daa520);
+  background: var(--slate-100);
+  border: 1px solid #e5e5e500;
+  border-radius: 0.9rem;
+  outline: #0000;
+  flex: 1;
+  padding: 1rem;
+  font-size: 1rem;
+  font-family: Poppins, sans-serif !important;
+}

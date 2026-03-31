@@ -7,6 +7,7 @@ import LS from "./ls.js";
 import calculateCeiling from "./scripts/calculators/calculateCeiling.js";
 import calculateWall from "./scripts/calculators/w111Calculator.js";
 import { trash, pencil, Ceiling, Wall } from "./assets/icons.js";
+import * as Icons from "./assets/icons.js";
 /* --- end imports --- */
 
 /**
@@ -259,7 +260,7 @@ const App = () => {
       {/* --- end print header --- */}
 
       <div className="min-h-screen bg-white">
-        <main className="p-[10px] max-w-4xl mx-auto">
+        <main className="p-4 max-w-4xl mx-auto">
           <header className="flex items-center justify-center h-[78px]">
             <h1 className="service-name text-[1.4rem] font-bold text-[#171e31]">
               Lista de Materiais
@@ -271,7 +272,7 @@ const App = () => {
             {serviceList.map((s) => (
               <div
                 key={s.id}
-                className="service-card p-4 mb-4 bg-[#f8fafc] border border-[#e2e8f0] rounded-[1.5rem]"
+                className="service-card p-4 mb-4 bg-white shadow-md border border-[#e2e8f000] rounded-[1.5rem]"
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
@@ -280,9 +281,16 @@ const App = () => {
                       {s.ident || "Geral"}
                     </p>
                   </div>
-                  <div className="badge bg-[#e0e7ff] text-[#4f46e5] px-3 py-1 rounded-full text-[10px] font-bold uppercase">
-                    {s.type === "wall" ? "Parede" : "Forro"}
-                  </div>
+                  {
+                    <div
+                      className={`badge ${s.type === "wall" ? "bg-green-100" : "bg-indigo-100"} ${s.type === "wall" ? "text-green-600" : "text-indigo-600"} px-3 py-1 rounded-full text-[10px] font-bold uppercase`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <Icon name={s.type === "wall" ? "Wall" : "Ceiling"} />
+                        {s.type === "wall" ? "Parede" : "Forro"}
+                      </span>
+                    </div>
+                  }
                 </div>
                 <div className="text-[13px] flex gap-4 text-slate-600 mb-3">
                   <span>
@@ -313,7 +321,7 @@ const App = () => {
           </div>
 
           {/* Tabela de Materiais */}
-          <div className="card shadow-sm overflow-hidden">
+          <div className="shadow-sm overflow-hidden">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-[#111d41] text-white text-[0.8rem] uppercase">
@@ -382,14 +390,14 @@ const App = () => {
 
         {/* Drawer */}
         {isDrawerOpen && (
-          <div
+          <drawer
             className="drawer-overlay active no-print"
             onClick={(e) =>
               e.target.classList.contains("drawer-overlay") &&
               setIsDrawerOpen(false)
             }
           >
-            <header className="drawer-header">
+            <header className="flex flex-col bg-white items-center justify-center sticky top-0 left-0 w-full h-[fit-content] p-4">
               <div
                 className="drawer-handle"
                 onClick={() => setIsDrawerOpen(false)}
@@ -397,54 +405,63 @@ const App = () => {
               <h2 className="text-[1rem] font-black uppercase text-indigo-900">
                 Adicionar Serviço
               </h2>
+              <div id="serviceCount" class="service-count">
+                <pill total-services> 1 serviços na lista </pill>
+              </div>
             </header>
             <form
+              id="form"
               className="bg-white p-4 h-full overflow-y-auto"
               onSubmit={handleSaveService}
             >
-              <label className="mb-4 block">
-                <span className="label-text">Cômodo</span>
-                <input
-                  type="text"
-                  className="w-full mt-1"
-                  value={roomName}
-                  onChange={(e) => setRoomName(e.target.value)}
-                  required
-                  placeholder="Ex: Sala"
-                />
-              </label>
+              <service-info className="flex flex-col gap-2">
+                <label className="block">
+                  <span className="label-text capitalize">Cômodo</span>
+                  <input
+                    type="text"
+                    className="drawer-input w-full mt-1"
+                    value={roomName}
+                    onChange={(e) => setRoomName(e.target.value)}
+                    required
+                    placeholder="Ex: Quarto, Sala, Cozinha"
+                  />
+                </label>
 
-              <service-selector className="flex border border-slate-300 rounded-lg overflow-hidden mb-4">
+                <label className="block">
+                  <span className="label-text capitalize">Identificação</span>
+                  <input
+                    type="text"
+                    className="drawer-input w-full"
+                    value={identification}
+                    onChange={(e) => setIdentification(e.target.value)}
+                    placeholder="Ex: Parede Leste"
+                  />
+                </label>
+              </service-info>
+
+              <service-selector className="flex border border-slate-300 rounded-[1rem] overflow-hidden p-[.25rem] relative items-center">
                 <button
                   type="button"
-                  className={`btn-select flex-1 p-2 ${serviceType === "ceiling" ? "active" : ""}`}
+                  className={`btn-select flex-1 p-2 ${serviceType === "ceiling" ? "active" : ""} rounded-[0.9rem_0_0_0.9rem_!important]`}
                   onClick={() => setServiceType("ceiling")}
                 >
+                  <Icon name="Ceiling" className="" />
                   Forro
                 </button>
                 <button
                   type="button"
-                  className={`btn-select flex-1 p-2 ${serviceType === "wall" ? "active" : ""}`}
+                  className={`btn-select flex-1 p-2 ${serviceType === "wall" ? "active" : ""} rounded-[0_0.9rem_0.9rem_0_!important]`}
                   onClick={() => setServiceType("wall")}
                 >
+                  <Icon name="Wall" className="" />
                   Parede
                 </button>
               </service-selector>
 
-              <label className="mb-4 block">
-                <input
-                  type="text"
-                  className="w-full"
-                  value={identification}
-                  onChange={(e) => setIdentification(e.target.value)}
-                  placeholder="Identificação (Ex: Parede Leste)"
-                />
-              </label>
-
               {serviceType === "wall" && (
                 <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg mb-4">
-                  <span className="text-xs font-bold text-amber-700 uppercase">
-                    Incluir Lã?
+                  <span className="text-[12px] font-[700] text-amber-600">
+                    Incluir Lã de Vidro/Pet?
                   </span>
                   <label className="switch">
                     <input
@@ -467,6 +484,7 @@ const App = () => {
                     <input
                       type="number"
                       step="0.01"
+                      className="drawer-input"
                       value={m.width}
                       onChange={(e) => {
                         const copy = [...measures];
@@ -483,6 +501,7 @@ const App = () => {
                     <input
                       type="number"
                       step="0.01"
+                      className="drawer-input"
                       value={m.length}
                       onChange={(e) => {
                         const copy = [...measures];
@@ -497,7 +516,7 @@ const App = () => {
 
               <button
                 type="button"
-                className="text-xs font-bold text-indigo-600 border-dashed border-2 border-indigo-100 w-full p-2 rounded-lg mt-2"
+                className="text-xs font-bold text-indigo-600 border-dashed border-2 border-indigo-100 w-[90%] h-[calc(0.25rem_*_9)] p-2 rounded-[calc(0.625rem_+_4px)] m-[0_auto]"
                 onClick={() =>
                   setMeasures([
                     ...measures,
@@ -508,25 +527,30 @@ const App = () => {
                 + Medida Extra
               </button>
 
-              <visor-area className="bg-[#4f46e5] text-white p-4 rounded-xl flex justify-between items-center mt-6">
-                <div className="text-xs">
-                  <span>Área Calculada</span>
-                  <br />
-                  <small>(Líquida)</small>
-                </div>
-                <div className="text-2xl font-bold">
+              <visor-area className="bg-indigo-600 w-[90%] text-white p-4 rounded-[calc(0.625rem_+_4px)] flex justify-between items-center m-[0_auto] shadow-sm">
+                <left className="text-xs">
+                  <span className="text-[12px] font-bold opacity-[.8] uppercase">
+                    Área Calculada
+                  </span>
+                  <small className="text-[12px] opacity-[.7] italic">
+                    (Bruta - Vãos)
+                  </small>
+                </left>
+                <right className="text-[20px] font-bold">
                   {calculateCurrentArea()} m²
-                </div>
+                </right>
               </visor-area>
-
+            </form>
+            <footer className="flex flex-col items-center justify-center fixed w-full h-[fit-content] p-4 bottom-0 left-0 bg-sky-50">
               <button
                 type="submit"
+                form="form"
                 className="btn-save-temp w-full bg-[#18181b] text-white p-4 rounded-xl mt-6"
               >
                 {editingId ? "Atualizar Serviço" : "Salvar Serviço"}
               </button>
-            </form>
-          </div>
+            </footer>
+          </drawer>
         )}
       </div>
     </>
@@ -535,3 +559,21 @@ const App = () => {
 
 const root = createRoot(document.getElementById("app_root"));
 root.render(<App />);
+
+const Icon = ({ name, className = "" }) => {
+  // Acessa o ícone pelo nome (ex: "trash", "Wall")
+  const svgString = Icons[name];
+
+  if (!svgString) return null;
+
+  return (
+    <span
+      className={`inline-flex items-center justify-center ${className}`}
+      dangerouslySetInnerHTML={{ __html: svgString }}
+    />
+  );
+};
+
+// Exemplo de uso:
+// <Icon name="trash" className="text-red-500" />
+// <Icon name="Ceiling" />
