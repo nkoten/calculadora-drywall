@@ -181,14 +181,14 @@ const App = () => {
       unit: 38.9,
     },
     {
-      desc: "Perfil F530 (3m)",
-      qty: totalMaterials.framing.f530Profiles,
-      unit: 19.9,
-    },
-    {
       desc: "Tabica (3m)",
       qty: totalMaterials.framing.perimeterTracks,
       unit: 24.9,
+    },
+    {
+      desc: "Perfil F530 (3m)",
+      qty: totalMaterials.framing.f530Profiles,
+      unit: 19.9,
     },
     {
       desc: "Guia 48mm (3m)",
