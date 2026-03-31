@@ -6,6 +6,7 @@ import { useReactToPrint } from "react-to-print";
 // Importação dos teus utilitários e lógica
 import LS from "./ls.js";
 import calculateCeiling from "./scripts/calculators/calculateCeiling.js";
+import { log } from "./helpers/helpers.js";
 import calculateWall from "./scripts/calculators/w111Calculator.js";
 import { trash, pencil, Ceiling, Wall } from "./assets/icons.js";
 import * as Icons from "./assets/icons.js";
@@ -137,24 +138,25 @@ const App = () => {
     serviceList.forEach((s) => {
       const safety = 1.0; // 5% margem
       // Usamos a primeira medida ou a soma delas para o calculador base
-      const width = s.measures[0].width;
-      const length = s.measures[0].length;
+      const width = Number( s.measures[0].width );
+      const length = Number( s.measures[0].length );
 
       // Chamada das funções originais mantendo a fidelidade
       const result =
         s.type === "ceiling"
           ? calculateCeiling({
-              width: s.measures[0].width,
-              length: s.measures[0].length,
+              width,
+              length,
               safety,
             }).data
           : calculateWall({
-              wallWidth: s.measures[0].width,
-              wallHeight: s.measures[0].length,
+              wallWidth: width,
+              wallHeight: length,
               openings: s.openings,
               safety,
             }).data;
 
+      log("result: ", result);
       // Soma manual respeitando cada campo original
       total.boards.drywallSheets += result.boards.drywallSheets;
       total.fixings.drywallScrews += result.fixings.drywallScrews;
@@ -179,6 +181,7 @@ const App = () => {
         total.framing.studs3m += result.framing.studs3m;
         total.insulation.insulationM2 += result.insulation.insulationM2 || 0;
       }
+      log("resultado: ", result);
     });
 
     return total;
@@ -333,7 +336,7 @@ const App = () => {
 
           {/* Tabela de Materiais */}
           <div className="shadow-sm overflow-hidden">
-            <table className="w-full border-collapse">
+            <table ref={pdfRef} className="w-full border-collapse">
               <thead>
                 <tr className="bg-[#111d41] text-white text-[0.8rem] uppercase">
                   <th className="p-2 text-right">qtd.</th>
@@ -376,7 +379,10 @@ const App = () => {
 
           <button
             className="w-full h-[56px] bg-[#00559c] text-white rounded-[1.1rem] mt-6 no-print"
-            onClick={() => window.print()}
+            onClick={ () => {
+              // window.print();
+              handlePrint();
+            } }
           >
             Imprimir / Gerar PDF
           </button>
@@ -402,7 +408,7 @@ const App = () => {
         {/* Drawer */}
         {isDrawerOpen && (
           <drawer
-            className="drawer-overlay active no-print"
+            className="drawer-overlay active no-print bg-white"
             onClick={(e) =>
               e.target.classList.contains("drawer-overlay") &&
               setIsDrawerOpen(false)
@@ -552,7 +558,7 @@ const App = () => {
                 </right>
               </visor-area>
             </form>
-            <footer className="flex flex-col items-center justify-center fixed w-full h-[fit-content] p-4 bottom-0 left-0 bg-sky-50">
+            <footer className="flex flex-col items-center justify-center w-full h-[fit-content] p-4 bottom-0 left-0 bg-sky-50">
               <button
                 type="submit"
                 form="form"

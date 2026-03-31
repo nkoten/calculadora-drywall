@@ -58,3 +58,12 @@ Object.defineProperty(Object.prototype, "oMap", {
   enumarable: false,
   configurable: true,
 });
+
+/**
+  * --- log() ---
+  *  */
+export const log = ( ...args ) => console.log(
+  "\n\n\n=== log() ===\n", ...args
+);
+
+

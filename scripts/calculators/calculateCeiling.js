@@ -124,9 +124,9 @@ export default function calculateCeiling({ width, length, labor, safety }) {
  * */
 
 // How to use:
-/* const myOfficeCeiling = calculateCeiling({
-  width: 4,
-  length: 5,
-  labor: 100,
+const myOfficeCeiling = calculateCeiling({
+  width: 3,
+  length: 4,
+  // labor: 100,
 });
-console.log("calculateCeiling", myOfficeCeiling); */
+console.log("calculateCeiling", myOfficeCeiling);
