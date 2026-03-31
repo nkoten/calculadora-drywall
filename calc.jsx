@@ -34,7 +34,7 @@ const App = () => {
   const pdfRef = useRef(null);
 
   // 
-  const dispararImpressao = useReactToPrint({
+  const handlePrint = useReactToPrint({
     contentRef: pdfRef, // Referência do que imprimir
     documentTitle: "Resultado_Calculo", // Nome do arquivo PDF
     onAfterPrint: () => console.log("Impressão finalizada!")
