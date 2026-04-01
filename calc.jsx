@@ -376,16 +376,6 @@ function App() {
             com a loja e a data da compra.
           </p>
           {/* --- end legal-notice on print --- */}
-
-          <button
-            className="w-full h-[56px] bg-[#00559c] text-white rounded-[1.1rem] mt-6 no-print"
-            onClick={() => {
-              // window.print();
-              handlePrint();
-            }}
-          >
-            Imprimir / Gerar PDF
-          </button>
         </main>
 
         {/* FAB */}
