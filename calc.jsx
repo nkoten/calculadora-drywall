@@ -15,7 +15,7 @@ import * as Icons from "./assets/icons.js";
 /**
  * --- Drywall Calculator App ---
  *  */
-const App = () => {
+function App() {
   // --- ESTADOS GLOBAIS ---
   const [serviceList, setServiceList] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -34,11 +34,11 @@ const App = () => {
   // referencia para o elemento de impressao
   const pdfRef = useRef(null);
 
-  // 
+  //
   const handlePrint = useReactToPrint({
     contentRef: pdfRef, // Referência do que imprimir
     documentTitle: "Resultado_Calculo", // Nome do arquivo PDF
-    onAfterPrint: () => console.log("Impressão finalizada!")
+    onAfterPrint: () => console.log("Impressão finalizada!"),
   });
 
   // --- PERSISTÊNCIA (LS.js) ---
@@ -138,8 +138,8 @@ const App = () => {
     serviceList.forEach((s) => {
       const safety = 1.0; // 5% margem
       // Usamos a primeira medida ou a soma delas para o calculador base
-      const width = Number( s.measures[0].width );
-      const length = Number( s.measures[0].length );
+      const width = Number(s.measures[0].width);
+      const length = Number(s.measures[0].length);
 
       // Chamada das funções originais mantendo a fidelidade
       const result =
@@ -379,10 +379,10 @@ const App = () => {
 
           <button
             className="w-full h-[56px] bg-[#00559c] text-white rounded-[1.1rem] mt-6 no-print"
-            onClick={ () => {
+            onClick={() => {
               // window.print();
               handlePrint();
-            } }
+            }}
           >
             Imprimir / Gerar PDF
           </button>
@@ -390,19 +390,29 @@ const App = () => {
 
         {/* FAB */}
         {!isDrawerOpen && (
-          <button className="fab-button no-print" onClick={handleOpenDrawer}>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M5 12h14m-7-7v14" />
-            </svg>
-            <span className="fab-text">Calcular</span>
-          </button>
+          <FAB
+            actions={[
+              {
+                label: "Novo Cálculo",
+                icon: "Ceiling",
+                iconColor: "text-indigo-600",
+                onClick: handleOpenDrawer,
+                show: true, // Sempre visível
+              },
+              {
+                label: "Exportar PDF",
+                icon: "pencil",
+                onClick: handlePrint,
+                show: serviceList.length > 0, // Só mostra se houver dados
+              },
+              {
+                label: "Salvar Imagem",
+                icon: "pack",
+                onClick: exportAsImage,
+                show: serviceList.length > 0, // Só mostra se houver dados
+              },
+            ]}
+          />
         )}
 
         {/* Drawer */}
@@ -572,11 +582,11 @@ const App = () => {
       </div>
     </>
   );
-};
+}
 
-const root = createRoot(document.getElementById("app_root"));
-root.render(<App />);
-
+/**
+ * --- Component: Icon ---
+ *  */
 const Icon = ({ name, className = "" }) => {
   // Acessa o ícone pelo nome (ex: "trash", "Wall")
   const svgString = Icons[name];
@@ -594,3 +604,71 @@ const Icon = ({ name, className = "" }) => {
 // Exemplo de uso:
 // <Icon name="trash" className="text-red-500" />
 // <Icon name="Ceiling" />
+
+/**
+ * --- export as image ---
+ *  */
+const exportAsImage = async ({ ref, bg, name, baseNase }) => {
+  // const element = pdfRef.current;
+  const element = ref.current;
+  const canvas = await html2canvas(element, {
+    backgroundColor: bg || "#ffffff",
+    scale: 2, // Aumenta a qualidade da imagem
+  });
+  const image = canvas.toDataURL("image/png");
+  const link = document.createElement("a");
+  link.href = image;
+  // link.download = `Orcamento_${roomName || "Drywall"}.png`;
+  link.download = `Orcamento_${name || "Drywall"}.png`;
+  link.click();
+};
+
+/**
+ * --- componente: fab ---
+ *  */
+const FAB = ({ actions = [] }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Filtra apenas ações que devem ser visíveis (ex: ignorar print se a lista estiver vazia)
+  const visibleActions = actions.filter((action) => action.show !== false);
+
+  return (
+    <div onClick={() => setIsOpen(!isOpen)} className="fab-button no-print">
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path d="M5 12h14m-7-7v14" />
+      </svg>
+      <span className="fab-text">Calcular</span>
+
+      {/* Menu de Opções */}
+      {isOpen && (
+        <div className="flex flex-col absolute right-0 bottom-[150%] mb-2 gap-2 animate-in fade-in slide-in-from-bottom-4 duration-200">
+          {visibleActions.map((action, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                action.onClick();
+                setIsOpen(false);
+              }}
+              className="flex items-center gap-3 bg-white border border-zinc-200 px-4 py-3 rounded-lg shadow-sm hover:bg-zinc-50 text-zinc-900 transition-colors whitespace-nowrap"
+            >
+              <Icon
+                name={action.icon}
+                className={`${action.iconColor || "text-zinc-500"} scale-110`}
+              />
+              <span className="text-sm font-medium">{action.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+/* --- app renderer --- */
+createRoot(document.getElementById("app_root")).render(<App />);
